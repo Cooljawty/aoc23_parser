@@ -5,8 +5,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let puzzle_input = get_input(puzzle_input_src)?;
 
-    for value in puzzle_input {
-        println!("val: {}", value);
+    for mut value in puzzle_input {
+        value.retain(|c| c.is_numeric());
+        value.replace_range(1..(if value.len() > 1  {value.len()-1} else {1}), "");
+        println!("{}", value);
+
     }
     Ok(())
 }
