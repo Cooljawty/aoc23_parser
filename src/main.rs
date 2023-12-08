@@ -5,15 +5,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let puzzle_input = get_input(puzzle_input_src)?;
 
-    for mut value in puzzle_input {
+    let answer = puzzle_input.iter().map(|value| {
+        let mut value = value.clone();
         value.retain(|c| c.is_numeric());
         value.replace_range(1..(if value.len() > 1  {value.len()-1} else {1}), "");
 
         let mut result = value.clone();
         if value.len() == 1 { result.insert_str(0, value.as_mut_str()) };
-        println!("{}", result);
+        
+        result.parse::<u32>().unwrap()
 
-    }
+    });
+    print!("{}", answer.fold(0, |a,n| a + n));
     Ok(())
 }
 
