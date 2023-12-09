@@ -5,19 +5,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let puzzle_input = get_input(puzzle_input_src)?;
 
-    let answer = puzzle_input.iter().map(|value| {
-        let mut value = value.clone();
-        value.retain(|c| c.is_numeric());
-        value.replace_range(1..(if value.len() > 1  {value.len()-1} else {1}), "");
-
-        let mut result = value.clone();
-        if value.len() == 1 { result.insert_str(0, value.as_mut_str()) };
-        
-        result.parse::<u32>().unwrap()
-
-    });
+    let answer = puzzle_input.iter().map(|value| parse_input(value));
     print!("{}", answer.fold(0, |a,n| a + n));
     Ok(())
+}
+
+fn parse_input(value: &String) -> u32 {
+    let mut value = value.clone();
+    value.retain(|c| c.is_numeric());
+    value.replace_range(1..(if value.len() > 1  {value.len()-1} else {1}), "");
+
+    let mut result = value.clone();
+    if value.len() == 1 { result.insert_str(0, value.as_mut_str()) };
+    
+    result.parse::<u32>().unwrap()
 }
 
 fn get_input(src: &str) -> Result<Vec<String>, Box<dyn std::error::Error>>{
