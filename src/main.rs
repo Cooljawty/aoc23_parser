@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use reqwest::header::{ USER_AGENT, COOKIE, CONNECTION };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -14,12 +15,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 //Parses line and returns the first and last digit as two digit number
 fn parse_input(value: &String) -> u32 {
     let mut value = value.trim().to_lowercase();
+    println!("value: {:?}", value);
 
-    let mut digits = Vec::<u32>::new();
-    while !value.is_empty() { match pop_number(&mut value) {
-        Some(num) => { digits.push(num as u32); }, //Should work as long as usize is atleast 4bits
-        None => { break; }
-    }}
+    let mut digits = pop_number(&mut value);
+    println!("digits: {:?}", digits);
 
     if digits.len() == 1 { digits.push(digits[0]) };
 
@@ -29,30 +28,37 @@ fn parse_input(value: &String) -> u32 {
 }
 
 //Parses line returning first digit and the remaining line
-fn pop_number(value: &mut String) -> Option<usize> {
-    static TOKENS: [&str;10] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]; 
+fn pop_number(value: &mut String) -> Vec<u32> {
+    let tokens: HashMap<&str, u32> = HashMap::from([
+        ("zero", 0),
+		("one", 1),
+		("two", 2),
+		("three", 3),
+		("four", 4),
+		("five", 5),
+		("six", 6),
+		("seven", 7),
+		("eight", 8),
+		("nine", 9),
+    ]); 
 
-    let mut substr = String::new();
-    while !value.is_empty() {
-        if !value.is_empty() {substr.push(value.remove(0)); }
+    let token_matches: Vec<(usize, u32)> = tokens.iter()
+        .flat_map(|(t, _)| value.match_indices(t).collect::<Vec<(usize, &str)>>())
+        .collect::<Vec<(usize,&str)>>()
+        .iter()
+        .map(|(i, t)| (*i, tokens[t]))
+        .collect::<Vec<(usize, u32)>>();
 
-        //Try getting numerics first
-        let digits: Vec<&str> = substr.matches(char::is_numeric).collect();
-        println!("{:?}", digits);
-        if !digits.is_empty() { return Some(digits.first()?.parse::<usize>().ok()?) }
+    let digit_matches: Vec<(usize, u32)> = value.match_indices(char::is_numeric)
+        .collect::<Vec<(usize, &str)>>()
+        .iter()
+        .map(|(i, d)| (*i, d.parse::<u32>().unwrap()))
+        .collect::<Vec<(usize, u32)>>();
 
-        for token in &TOKENS {
-            let digits: Vec<&str> = substr.matches(token).collect();
-            if !digits.is_empty() { 
-                return match digits.first() {
-                    Some(digit) => TOKENS.iter().position(|t| t == digit),
-                    None => None,
-                }
-            }
-        }
-    }
+    let mut search: Vec<(usize, u32)> = digit_matches.into_iter().chain(token_matches.into_iter()).collect();
 
-    None
+    search.sort_by(|a, b| a.0.cmp(&b.0) );
+    search.into_iter().map(|(_, v)| v).collect::<Vec<u32>>()
 }
 
 fn get_input(src: &str, auth: &str) -> Result<Vec<String>, Box<dyn std::error::Error>>{
@@ -79,14 +85,15 @@ fn get_input(src: &str, auth: &str) -> Result<Vec<String>, Box<dyn std::error::E
 
 #[cfg(test)]
 mod tests {
-    use crate::*;
+    use super::*;
 
     #[test]
     fn day1_part2() {
         let test_values = vec!(
             ("onthreethreeboat", 33),
-            ("twoeightwo", 28),
+            ("twoeightwo", 22),
             ("bxfour3two2sb4twondmfdpsz", 42),
+            ("sevenine", 79),
         );
 
         for (input, output) in test_values{
