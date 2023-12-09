@@ -10,15 +10,43 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn pop_number(value: &mut String) -> Option<usize> {
+    static TOKENS: [&str;10] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]; 
+
+    let mut substr = String::new();
+    while !value.is_empty() {
+        if !value.is_empty() {substr.push(value.remove(0)); }
+
+        //Try getting numerics first
+        let digits: Vec<&str> = substr.matches(char::is_numeric).collect();
+        if !digits.is_empty() { return Some(digits.first()?.parse::<usize>().ok()?) }
+
+        for token in &TOKENS {
+            let digits: Vec<&str> = substr.matches(token).collect();
+            if !digits.is_empty() { 
+                return match digits.first() {
+                    Some(digit) => TOKENS.iter().position(|t| t == digit),
+                    None => None,
+                }
+            }
+        }
+    }
+
+    None
+}
+
 fn parse_input(value: &String) -> u32 {
     let mut value = value.clone();
-    value.retain(|c| c.is_numeric());
-    value.replace_range(1..(if value.len() > 1  {value.len()-1} else {1}), "");
 
-    let mut result = value.clone();
-    if value.len() == 1 { result.insert_str(0, value.as_mut_str()) };
-    
-    result.parse::<u32>().unwrap()
+    let mut digits = Vec::<u32>::new();
+    while !value.is_empty() { match pop_number(&mut value) {
+        Some(num) => { digits.push(num as u32); }, //Should work as long as usize is atleast 4bits
+        None => { break; }
+    }}
+
+    if digits.len() == 1 { digits.push(digits[0]) };
+
+    digits.remove(0) + digits.remove(digits.len()-1) * 10
 }
 
 fn get_input(src: &str) -> Result<Vec<String>, Box<dyn std::error::Error>>{
