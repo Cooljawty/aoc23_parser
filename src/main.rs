@@ -1,15 +1,34 @@
 use reqwest::header::{ USER_AGENT, COOKIE};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let auth = "53616c7465645f5f64963b27dc1a96e3b498e57c182fdeeaffe976345070fc3d0f22c88c1d91459933897ad530ab45683a294585bdea24b9a034f97ee4c8d46b";
     let puzzle_input_src = "https://adventofcode.com/2023/day/1/input";
 
-    let puzzle_input = get_input(puzzle_input_src)?;
+    let puzzle_input = get_input(puzzle_input_src, auth)?;
 
     let answer = puzzle_input.iter().map(|value| parse_input(value));
-    print!("{}", answer.fold(0, |a,n| a + n));
+    println!("+__\n{}", answer.sum::<u32>());
     Ok(())
 }
 
+//Parses line and returns the first and last digit as two digit number
+fn parse_input(value: &String) -> u32 {
+    let mut value = value.trim().to_lowercase();
+
+    let mut digits = Vec::<u32>::new();
+    while !value.is_empty() { match pop_number(&mut value) {
+        Some(num) => { digits.push(num as u32); }, //Should work as long as usize is atleast 4bits
+        None => { break; }
+    }}
+
+    if digits.len() == 1 { digits.push(digits[0]) };
+
+    print!(" {}\n", digits[digits.len()-1] + digits[0] * 10);
+
+    digits.remove(digits.len()-1) + digits.remove(0) * 10
+}
+
+//Parses line returning first digit and the remaining line
 fn pop_number(value: &mut String) -> Option<usize> {
     static TOKENS: [&str;10] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]; 
 
@@ -35,24 +54,10 @@ fn pop_number(value: &mut String) -> Option<usize> {
     None
 }
 
-fn parse_input(value: &String) -> u32 {
-    let mut value = value.clone();
-
-    let mut digits = Vec::<u32>::new();
-    while !value.is_empty() { match pop_number(&mut value) {
-        Some(num) => { digits.push(num as u32); }, //Should work as long as usize is atleast 4bits
-        None => { break; }
-    }}
-
-    if digits.len() == 1 { digits.push(digits[0]) };
-
-    digits.remove(0) + digits.remove(digits.len()-1) * 10
-}
-
-fn get_input(src: &str) -> Result<Vec<String>, Box<dyn std::error::Error>>{
+fn get_input(src: &str, auth: &str) -> Result<Vec<String>, Box<dyn std::error::Error>>{
     let res = reqwest::blocking::Client::new().get(src)
         .header(USER_AGENT, "")
-        .header(COOKIE, "session=53616c7465645f5f64963b27dc1a96e3b498e57c182fdeeaffe976345070fc3d0f22c88c1d91459933897ad530ab45683a294585bdea24b9a034f97ee4c8d46b")
+        .header(COOKIE, format!("session={}", auth))
         .send()?;
 
     let res_body= res.text()?;
