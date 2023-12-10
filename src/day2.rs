@@ -10,15 +10,10 @@ pub fn get_answer(input: Vec<String>) -> u32{
 
 fn parse_input(input: &String) -> (usize, Vec<(u32, u32, u32)>) {
     //Sperate games into matches
-    let mut matches: Vec<&str> = input.split(';').collect();
-    let first_str = matches.first_mut().unwrap();
-    let parts: Vec<&str> = first_str.split(':').collect();
+    let matches: Vec<&str> = input.split(|c: char| c.is_whitespace() || [';', ':', ','].contains(&c)).collect();
 
     //Extract game index
-    let mut index = parts[0].to_string();
-    index.retain(|c| c.is_numeric()); 
-    let index = index.parse::<u32>().unwrap();
-    *first_str = parts[1];
+    let Ok(Token::Count(index)) = matches[1].to_string().parse::<Token>() else {panic!("Missing game index!")};
 
     println!("\nRound {index}:");
     for round in matches {

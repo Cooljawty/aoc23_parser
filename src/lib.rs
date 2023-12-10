@@ -3,7 +3,8 @@ pub mod tokenizer {
 
     #[derive(Debug)]
     pub enum Token {
-        Color(&'static str),
+        Game,
+        Keyword(&'static str),
         Count(i32),
         StartLine,
         EndLine,
@@ -15,7 +16,7 @@ pub mod tokenizer {
 
         fn from_str(input: &str) -> Result<Self, Self::Err> {
             Ok( match input {
-                _ if KEYWORDS.iter().any(|&k| k == input)  => Token::Color(KEYWORDS.iter().find(|&&k| k == input).unwrap()),
+                _ if KEYWORDS.iter().any(|&k| k == input)  => Token::Keyword(KEYWORDS.iter().find(|&&k| k == input).unwrap()),
                 num if num.parse::<i32>().is_ok() => Token::Count(num.parse::<i32>().unwrap()), 
                 _ => { return Err(ParseTokenError{}); },
             })
