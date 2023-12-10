@@ -10,13 +10,15 @@ pub fn get_answer(input: Vec<String>) -> u32{
 }
 
 fn parse_input(input: &String) -> Option<(usize, Vec<(u32, u32, u32)>)> {
-    println!("\nline: {:?}", input);
     //Sperate games into matches
-    let matches: Vec<&str> = input.split(|c: char| {
-        c.is_whitespace() || [':', ','].contains(&c)
-    })
-    .collect();
-
+    let matches: Vec<&str> = input
+        .split(|c: char| { c.is_whitespace() })
+        //Split seperators to sepreate tokens
+        .flat_map(|w| w.split(';')).map(|p| match p {"" => ";", _ => p})
+        .flat_map(|w| w.split(':')).map(|p| match p {"" => ":", _ => p})
+        .flat_map(|w| w.split(',')).map(|p| match p {"" => ",", _ => p})
+        .collect();
+    
     //Extract game index
     let Ok(Token::Count(index)) = matches[1].to_string().parse::<Token>() else {panic!("Missing game index!")};
 
