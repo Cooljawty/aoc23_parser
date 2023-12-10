@@ -5,7 +5,7 @@ pub mod tokenizer {
     pub enum Token {
         Game,
         Keyword(&'static str),
-        Count(i32),
+        Count(u32),
         StartLine,
         EndLine,
     }
@@ -17,7 +17,7 @@ pub mod tokenizer {
         fn from_str(input: &str) -> Result<Self, Self::Err> {
             Ok( match input {
                 _ if KEYWORDS.iter().any(|&k| k == input)  => Token::Keyword(KEYWORDS.iter().find(|&&k| k == input).unwrap()),
-                num if num.parse::<i32>().is_ok() => Token::Count(num.parse::<i32>().unwrap()), 
+                num if num.parse::<i32>().is_ok() => Token::Count(num.parse::<u32>().unwrap()), 
                 _ => { return Err(ParseTokenError{}); },
             })
         }

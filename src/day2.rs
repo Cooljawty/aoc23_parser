@@ -10,9 +10,10 @@ pub fn get_answer(input: Vec<String>) -> u32{
 }
 
 fn parse_input(input: &String) -> Option<(usize, Vec<(u32, u32, u32)>)> {
+    println!("\nline: {:?}", input);
     //Sperate games into matches
     let matches: Vec<&str> = input.split(|c: char| {
-        c.is_whitespace() || [';', ':', ','].contains(&c)
+        c.is_whitespace() || [':', ','].contains(&c)
     })
     .collect();
 
@@ -24,8 +25,9 @@ fn parse_input(input: &String) -> Option<(usize, Vec<(u32, u32, u32)>)> {
     Some((index.try_into().ok()?, vec!((0, 0, 0))))
 }
 
+#[derive(Debug, PartialEq, Eq)]
+enum Color { Red, Green, Blue }
 fn get_result(input: Vec<&str>) -> Option<Vec<(u32, u32, u32)>> {
-    //println!("\nline: {:?}", input);
     let mut token_stack = vec!(Token::StartLine);
     for mut word in input {
         word = word.trim();
@@ -36,9 +38,48 @@ fn get_result(input: Vec<&str>) -> Option<Vec<(u32, u32, u32)>> {
         //println!("input: {:?}\nstack: {:?}", word, token_stack)
     }
 
+    //Evaluate stack
+    let mut count: u32 = 0;
+    let mut curr_color: Option<Color> = None;
+
+    let mut matches = Vec::<(u32, u32, u32)>::new();
+    let mut curr_match = (0,0,0);
     while let Some(token) = token_stack.pop() { 
-        todo!("Evaluate stack")
+        //println!("{:?}", token);
+        match token {
+            Token::Keyword(color) if color != "Game" => {
+                let new_color = match color {
+                    "red" => Color::Red,
+                    "green" => Color::Green,
+                    "blue" => Color::Blue,
+                    _ => {panic!("Loose color matching.\nThis should not happen!")}
+                };
+
+                match curr_color {
+                    //Reset on repead color token
+                    Some(color) if color == new_color  => {count = 0}
+                    Some(color) => { 
+                        match color {
+                            Color::Red => { curr_match.0 = count; },
+                            Color::Green => { curr_match.1 = count; },
+                            Color::Blue => { curr_match.2 = count; },
+                        }
+                    },
+                    None => match new_color {
+                            Color::Red => { curr_match.0 = count; },
+                            Color::Green => { curr_match.1 = count; },
+                            Color::Blue => { curr_match.2 = count; },
+                    },
+                };
+
+                curr_color = Some(new_color);
+                //println!("{:?} {:?}", curr_color, curr_match);
+            },
+            Token::Count(digit) => count = digit, 
+            _ => {}, 
+        }
     }
+    println!("{:?} ", matches);
     
     None
 
