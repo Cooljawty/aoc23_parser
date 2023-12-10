@@ -20,7 +20,7 @@ fn parse_input(input: &String) -> (usize, Vec<(u32, u32, u32)>) {
     let index = index.parse::<u32>().unwrap();
     *first_str = parts[1];
 
-    println!("Round {index}:\n");
+    println!("\nRound {index}:");
     for round in matches {
         get_result(round);
     }
@@ -28,16 +28,20 @@ fn parse_input(input: &String) -> (usize, Vec<(u32, u32, u32)>) {
     (0, vec!((0, 0, 0)))
 }
 
-fn get_result(input: &str) -> Option<(u32, u32, u32)> {
-    let mut token_stack = Vec::<Token>::new();
+fn get_result(input: &str) -> Option<Vec<(u32, u32, u32)>> {
+    println!("\nline: {:?}", input);
+    let mut token_stack = vec!(Token::StartLine);
     for mut word in input.split_whitespace() {
         word = word.trim();
-
-        token_stack.push(word.parse::<Token>().ok()?);
+        match word.parse::<Token>().ok() {
+            Some(token) => { token_stack.push(token); },
+            None => {},
+        }
+        println!("input: {:?}\nstack: {:?}", word, token_stack)
     }
-   
-
+    
     None
+
 }
 
 #[cfg(test)]

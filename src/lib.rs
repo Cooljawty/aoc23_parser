@@ -1,8 +1,12 @@
 pub mod tokenizer { 
     use std::str::FromStr;
+
+    #[derive(Debug)]
     pub enum Token {
         Color(&'static str),
         Count(i32),
+        StartLine,
+        EndLine,
     }
     static KEYWORDS: [&'static str;3] = ["red", "green", "blue"]; 
 
