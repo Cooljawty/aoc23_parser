@@ -1,6 +1,4 @@
-use std::{
-    str::FromStr,
-};
+use advent_of_code_2023::tokenizer::Token;
 
 pub fn get_answer(input: Vec<String>) -> u32{
     for line in input {
@@ -29,26 +27,6 @@ fn parse_input(input: &String) -> (usize, Vec<(u32, u32, u32)>) {
 
     (0, vec!((0, 0, 0)))
 }
-
-enum Token {
-    Color(&'static str),
-    Count(i32),
-}
-static KEYWORDS: [&'static str;3] = ["red", "green", "blue"]; 
-
-impl FromStr for Token {
-    type Err = ParseTokenError;
-
-    fn from_str(input: &str) -> Result<Self, Self::Err> {
-        Ok( match input {
-            _ if KEYWORDS.iter().any(|&k| k == input)  => Token::Color(KEYWORDS.iter().find(|&&k| k == input).unwrap()),
-            num if num.parse::<i32>().is_ok() => Token::Count(num.parse::<i32>().unwrap()), 
-            _ => { return Err(ParseTokenError{}); },
-        })
-    }
-}
-
-struct ParseTokenError {}
 
 fn get_result(input: &str) -> Option<(u32, u32, u32)> {
     let mut token_stack = Vec::<Token>::new();
