@@ -1,13 +1,28 @@
 use reqwest::header::{ USER_AGENT, COOKIE, CONNECTION };
 
-mod day1;
+mod day1; mod day2;
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let auth = "53616c7465645f5f64963b27dc1a96e3b498e57c182fdeeaffe976345070fc3d0f22c88c1d91459933897ad530ab45683a294585bdea24b9a034f97ee4c8d46b";
-    let puzzle_input_src = "https://adventofcode.com/2023/day/1/input";
+    let puzzle_input_src = vec!(
+        "https://adventofcode.com/2023/day/1/input",
+        "https://adventofcode.com/2023/day/2/input",
+    );
 
-    let puzzle_input = get_input(puzzle_input_src, auth)?;
+    let mut puzzle_input = puzzle_input_src.into_iter().filter_map(|src| get_input(src, auth).ok());
+    
+    //Solve Day 1 part 2
+    match puzzle_input.next() {
+        Some(num) => { println!("Day 1: {}", day1::get_answer(num)) },
+        None => { return Err("Could not get Day 1 input".into()) },
+    }
 
-    println!("Day 1: {}", day1::get_answer(puzzle_input));
+    //Solve Day 2 part 1
+    match puzzle_input.next() {
+        Some(num) => { println!("Day 2: {}", day2::get_answer(num)) },
+        None => { return Err("Could not get Day 2 input".into()) },
+    }
+
     Ok(())
 }
 
@@ -33,22 +48,3 @@ fn get_input(src: &str, auth: &str) -> Result<Vec<String>, Box<dyn std::error::E
 
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn day1_part2() {
-        let test_values = vec!(
-            ("onthreethreeboat", 33),
-            ("twoeightwo", 22),
-            ("bxfour3two2sb4twondmfdpsz", 42),
-            ("sevenine", 79),
-        );
-
-        for (input, output) in test_values{
-            assert_eq!(parse_input(&input.to_string()), output, 
-            "Given '{input}', expected {output} but got {}", parse_input(&input.to_string()))
-        }
-    }
-}

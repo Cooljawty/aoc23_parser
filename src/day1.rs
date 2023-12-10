@@ -50,3 +50,22 @@ fn pop_number(value: &mut String) -> Vec<u32> {
     search.into_iter().map(|(_, v)| v).collect::<Vec<u32>>()
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn part2() {
+        let test_values = vec!(
+            ("onthreethreeboat", 33),
+            ("twoeightwo", 22),
+            ("bxfour3two2sb4twondmfdpsz", 42),
+            ("sevenine", 79),
+        );
+
+        for (input, output) in test_values{
+            assert_eq!(parse_input(&input.to_string()), output, 
+            "Given '{input}', expected {output} but got {}", parse_input(&input.to_string()))
+        }
+    }
+}
