@@ -9,11 +9,12 @@ pub fn get_answer(input: Vec<String>) -> u32{
 }
 
 fn parse_input(input: &String) -> (usize, Vec<(u32, u32, u32)>) {
+    //Sperate games into matches
     let mut matches: Vec<&str> = input.split(';').collect();
-    
     let first_str = matches.first_mut().unwrap();
     let parts: Vec<&str> = first_str.split(':').collect();
 
+    //Extract game index
     let mut index = parts[0].to_string();
     index.retain(|c| c.is_numeric()); 
     let index = index.parse::<u32>().unwrap();
@@ -21,8 +22,7 @@ fn parse_input(input: &String) -> (usize, Vec<(u32, u32, u32)>) {
 
     println!("Round {index}:\n");
     for round in matches {
-        let Some(result) = get_result(round) else { panic!("Parser is wrong")};
-        println!("{:?}", result);
+        get_result(round);
     }
 
     (0, vec!((0, 0, 0)))
@@ -30,7 +30,7 @@ fn parse_input(input: &String) -> (usize, Vec<(u32, u32, u32)>) {
 
 fn get_result(input: &str) -> Option<(u32, u32, u32)> {
     let mut token_stack = Vec::<Token>::new();
-    for mut word in input.split(char::is_whitespace) {
+    for mut word in input.split_whitespace() {
         word = word.trim();
 
         token_stack.push(word.parse::<Token>().ok()?);
