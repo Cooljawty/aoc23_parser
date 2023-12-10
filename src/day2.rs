@@ -1,3 +1,7 @@
+use std::{
+    str::FromStr,
+};
+
 pub fn get_answer(input: Vec<String>) -> u32{
     for line in input {
         parse_input(&line);
@@ -19,12 +23,44 @@ fn parse_input(input: &String) -> (usize, Vec<(u32, u32, u32)>) {
 
     println!("Round {index}:\n");
     for round in matches {
-        println!("{:?}", round);
+        let Some(result) = get_result(round) else { panic!("Parser is wrong")};
+        println!("{:?}", result);
     }
 
     (0, vec!((0, 0, 0)))
 }
 
+enum Token {
+    Color(&'static str),
+    Count(i32),
+}
+static KEYWORDS: [&'static str;3] = ["red", "green", "blue"]; 
+
+impl FromStr for Token {
+    type Err = ParseTokenError;
+
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        Ok( match input {
+            _ if KEYWORDS.iter().any(|&k| k == input)  => Token::Color(KEYWORDS.iter().find(|&&k| k == input).unwrap()),
+            num if num.parse::<i32>().is_ok() => Token::Count(num.parse::<i32>().unwrap()), 
+            _ => { return Err(ParseTokenError{}); },
+        })
+    }
+}
+
+struct ParseTokenError {}
+
+fn get_result(input: &str) -> Option<(u32, u32, u32)> {
+    let mut token_stack = Vec::<Token>::new();
+    for mut word in input.split(char::is_whitespace) {
+        word = word.trim();
+
+        token_stack.push(word.parse::<Token>().ok()?);
+    }
+   
+
+    None
+}
 
 #[cfg(test)]
 mod tests {
