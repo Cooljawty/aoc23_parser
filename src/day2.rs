@@ -3,36 +3,41 @@ use advent_of_code_2023::tokenizer::Token;
 pub fn get_answer(input: Vec<String>) -> u32{
     for line in input {
         parse_input(&line);
+        break;
     }
 
     return 0;
 }
 
-fn parse_input(input: &String) -> (usize, Vec<(u32, u32, u32)>) {
+fn parse_input(input: &String) -> Option<(usize, Vec<(u32, u32, u32)>)> {
     //Sperate games into matches
-    let matches: Vec<&str> = input.split(|c: char| c.is_whitespace() || [';', ':', ','].contains(&c)).collect();
+    let matches: Vec<&str> = input.split(|c: char| {
+        c.is_whitespace() || [';', ':', ','].contains(&c)
+    })
+    .collect();
 
     //Extract game index
     let Ok(Token::Count(index)) = matches[1].to_string().parse::<Token>() else {panic!("Missing game index!")};
 
-    println!("\nRound {index}:");
-    for round in matches {
-        get_result(round);
-    }
+    get_result(matches);
 
-    (0, vec!((0, 0, 0)))
+    Some((index.try_into().ok()?, vec!((0, 0, 0))))
 }
 
-fn get_result(input: &str) -> Option<Vec<(u32, u32, u32)>> {
-    println!("\nline: {:?}", input);
+fn get_result(input: Vec<&str>) -> Option<Vec<(u32, u32, u32)>> {
+    //println!("\nline: {:?}", input);
     let mut token_stack = vec!(Token::StartLine);
-    for mut word in input.split_whitespace() {
+    for mut word in input {
         word = word.trim();
         match word.parse::<Token>().ok() {
             Some(token) => { token_stack.push(token); },
             None => {},
         }
-        println!("input: {:?}\nstack: {:?}", word, token_stack)
+        //println!("input: {:?}\nstack: {:?}", word, token_stack)
+    }
+
+    while let Some(token) = token_stack.pop() { 
+        todo!("Evaluate stack")
     }
     
     None

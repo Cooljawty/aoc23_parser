@@ -9,7 +9,7 @@ pub mod tokenizer {
         StartLine,
         EndLine,
     }
-    static KEYWORDS: [&'static str;3] = ["red", "green", "blue"]; 
+    static KEYWORDS: &[&'static str] = &["red", "green", "blue", "Game"]; 
 
     impl FromStr for Token {
         type Err = ParseTokenError;
