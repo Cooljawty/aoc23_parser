@@ -2,6 +2,7 @@ use advent_of_code_2023::tokenizer::Token;
 
 pub fn get_answer(input: Vec<String>) -> u32{
     for line in input {
+        println!("{}", line);
         parse_input(&line);
         break;
     }
@@ -47,7 +48,7 @@ fn get_result(input: Vec<&str>) -> Option<Vec<(u32, u32, u32)>> {
     let mut matches = Vec::<(u32, u32, u32)>::new();
     let mut curr_match = (0,0,0);
     while let Some(token) = token_stack.pop() { 
-        //println!("{:?}", token);
+        println!("{:?}", token);
         match token {
             Token::Keyword(color) if color != "Game" => {
                 let new_color = match color {
@@ -59,8 +60,8 @@ fn get_result(input: Vec<&str>) -> Option<Vec<(u32, u32, u32)>> {
 
                 match curr_color {
                     //Reset on repead color token
-                    Some(color) if color == new_color  => {count = 0}
-                    Some(color) => { 
+                    Some(ref color) if *color == new_color  => {count = 0}
+                    Some(ref color) => { 
                         match color {
                             Color::Red => { curr_match.0 = count; },
                             Color::Green => { curr_match.1 = count; },
@@ -78,6 +79,23 @@ fn get_result(input: Vec<&str>) -> Option<Vec<(u32, u32, u32)>> {
                 //println!("{:?} {:?}", curr_color, curr_match);
             },
             Token::Count(digit) => count = digit, 
+            Token::Seperator(s) => match s {
+                ";"|":" => { 
+                    match curr_color {
+                        Some(ref color) => { 
+                            match color {
+                                Color::Red => { curr_match.0 = count; },
+                                Color::Green => { curr_match.1 = count; },
+                                Color::Blue => { curr_match.2 = count; },
+                            }
+                        },
+                        None => {},
+                    };
+                    matches.push(curr_match); 
+                    curr_match = (0,0,0); 
+                }
+                _ => {}
+            }
             _ => {}, 
         }
     }
