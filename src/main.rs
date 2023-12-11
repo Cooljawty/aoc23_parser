@@ -1,6 +1,6 @@
 use reqwest::header::{ USER_AGENT, COOKIE, CONNECTION };
 
-//mod day1; 
+mod day1; 
 mod day2;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -14,7 +14,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     //Solve Day 1 part 2
     match puzzle_input.next() {
-        Some(_) => {}, // println!("Day 1: {}", day1::get_answer(num)) },
+        Some(src) => { println!("Day 1: {}", day1::get_answer(src)) },
         None => { return Err("Could not get Day 1 input".into()) },
     }
 
