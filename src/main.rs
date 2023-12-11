@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     //Solve Day 2 part 1
     match puzzle_input.next() {
-        Some(_) => { println!("Day 2: {}", day2::get_answer(vec!("Game 1: ;1 red, 2 green, 3 blue".to_string()))) },
+        Some(src) => { println!("Day 2: {}", day2::get_answer(src)) },
         None => { return Err("Could not get Day 2 input".into()) },
     }
 
