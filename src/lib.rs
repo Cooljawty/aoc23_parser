@@ -11,8 +11,8 @@ pub mod tokenizer {
         EndLine,
     }
 
-    static KEYWORDS: &[&'static str] = &["red", "green", "blue", "Game"]; 
-    static SEPERATORS: &[&'static str] = &[";", ":", ","]; 
+    const KEYWORDS: &'static [&str] = &["red", "green", "blue", "Game"]; 
+    const SEPERATORS: &'static [&str] = &[";", ":", ","]; 
 
     impl FromStr for Token {
         type Err = ParseTokenError;

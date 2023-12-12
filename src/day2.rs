@@ -2,6 +2,7 @@ use std::cmp;
 
 use advent_of_code_2023::tokenizer::Token;
 
+#[allow(dead_code)]
 pub fn get_answer_part_1(input: Vec<String>) -> u32{
     let mut sum = 0;
     'line: for line in input {
@@ -43,42 +44,41 @@ pub fn get_answer(input: Vec<String>) -> u32{
 }
 
 fn parse_input(input: &String, index: &mut u32) -> Option<Vec<(u32, u32, u32)>> {
-    //Sperate games into matches
-    let matches: Vec<&str> = input
-        .split(|c: char| { c.is_whitespace() })
-        //Split seperators to sepreate tokens
-        .flat_map(|w| w.split(';')).map(|p| match p {"" => ";", _ => p})
-        .flat_map(|w| w.split(':')).map(|p| match p {"" => ":", _ => p})
-        .flat_map(|w| w.split(',')).map(|p| match p {"" => ",", _ => p})
-        .collect();
-    
-    //Extract game index
-    let Ok(Token::Count(game)) = matches[1].to_string().parse::<Token>() else {panic!("Missing game index!")};
-    *index = game;
 
-    get_result(matches)
+    let mut token_stack = Vec::<Token>::new();
+
+    let mut word = String::new();
+    for c in input.chars() {
+        if c.is_whitespace() {
+            word.clear();
+            continue;
+        }
+
+        word.push(c);
+        match word.parse::<Token>().ok() {
+            Some(token) => { 
+                token_stack.push(token); 
+                word.clear();
+                continue;
+            },
+            None => {},
+        }
+    }
+
+    get_result(token_stack)
 
 }
 
 #[derive(Debug, PartialEq, Eq)]
 enum Color { Red, Green, Blue }
-fn get_result(input: Vec<&str>) -> Option<Vec<(u32, u32, u32)>> {
-    let mut token_stack = vec!(Token::StartLine);
-    for mut word in input {
-        word = word.trim();
-        match word.parse::<Token>().ok() {
-            Some(token) => { token_stack.push(token); },
-            None => {},
-        }
-    }
-
+fn get_result(mut input: Vec<Token>) -> Option<Vec<(u32, u32, u32)>> {
     //Evaluate stack
     let mut count: u32 = 0;
     let mut curr_color: Option<Color> = None;
 
     let mut matches = Vec::<(u32, u32, u32)>::new();
     let mut curr_match = (0,0,0);
-    while let Some(token) = token_stack.pop() { 
+    while let Some(token) = input.pop() { 
         match token {
             Token::Keyword(color) if color != "Game" => {
                 let new_color = match color.as_str() {
