@@ -4,12 +4,13 @@ pub mod tokenizer {
     #[derive(Debug)]
     pub enum Token {
         Game,
-        Keyword(&'static str),
+        Keyword(String),
         Count(u32),
-        Seperator(&'static str),
+        Seperator(String),
         StartLine,
         EndLine,
     }
+
     static KEYWORDS: &[&'static str] = &["red", "green", "blue", "Game"]; 
     static SEPERATORS: &[&'static str] = &[";", ":", ","]; 
 
@@ -18,8 +19,8 @@ pub mod tokenizer {
 
         fn from_str(input: &str) -> Result<Self, Self::Err> {
             Ok( match input {
-                _ if KEYWORDS.iter().any(|&k| k == input)  => Token::Keyword(KEYWORDS.iter().find(|&&k| k == input).unwrap()),
-                _ if SEPERATORS.iter().any(|&k| k == input)  => Token::Seperator(SEPERATORS.iter().find(|&&s| s == input).unwrap()),
+                keyword   if KEYWORDS.iter().any(|&k| k == input)   => Token::Keyword(keyword.to_string()),
+                seperator if SEPERATORS.iter().any(|&s| s == input) => Token::Seperator(seperator.to_string()),
                 num if num.parse::<i32>().is_ok() => Token::Count(num.parse::<u32>().unwrap()), 
                 _ => { return Err(ParseTokenError{}); },
             })

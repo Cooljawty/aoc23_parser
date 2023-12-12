@@ -81,7 +81,7 @@ fn get_result(input: Vec<&str>) -> Option<Vec<(u32, u32, u32)>> {
     while let Some(token) = token_stack.pop() { 
         match token {
             Token::Keyword(color) if color != "Game" => {
-                let new_color = match color {
+                let new_color = match color.as_str() {
                     "red" => Color::Red,
                     "green" => Color::Green,
                     "blue" => Color::Blue,
@@ -108,7 +108,7 @@ fn get_result(input: Vec<&str>) -> Option<Vec<(u32, u32, u32)>> {
                 curr_color = Some(new_color);
             },
             Token::Count(digit) => count = digit, 
-            Token::Seperator(s) => match s {
+            Token::Seperator(s) => match s.as_str() {
                 ";"|":" => { 
                     match curr_color {
                         Some(ref color) => { 
