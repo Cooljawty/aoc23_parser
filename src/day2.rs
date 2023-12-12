@@ -1,6 +1,8 @@
+use std::cmp;
+
 use advent_of_code_2023::tokenizer::Token;
 
-pub fn get_answer(input: Vec<String>) -> u32{
+pub fn get_answer_part_1(input: Vec<String>) -> u32{
     let mut sum = 0;
     'line: for line in input {
         let mut index: u32 = 0;
@@ -13,6 +15,28 @@ pub fn get_answer(input: Vec<String>) -> u32{
             };
         }
         sum += index;
+    }
+
+    return sum;
+}
+
+pub fn get_answer(input: Vec<String>) -> u32{
+    let mut sum = 0;
+    for line in input {
+        println!("{}", line);
+        let mut index: u32 = 0;
+        let mut color_count = (0,0,0);
+        for result in parse_input(&line, &mut index).unwrap() {
+            color_count = (
+                cmp::max(result.0, color_count.0), 
+                cmp::max(result.1, color_count.1), 
+                cmp::max(result.2, color_count.2)
+            );
+            //println!("Result: {:?}, {:?}", result, color_count);
+        }
+        let power = color_count.0 * color_count.1 * color_count.2; 
+        //println!("Power: {power}");
+        sum += power;
     }
 
     return sum;
@@ -143,6 +167,19 @@ mod tests {
             "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green",
         );
 
-        assert_eq!(get_answer(test_input.iter().map(|s| s.to_string()).collect()), 8);
+        assert_eq!(get_answer_part_1(test_input.iter().map(|s| s.to_string()).collect()), 8);
+    }
+
+    #[test]
+    fn part2() {
+        let test_input = vec!(
+            "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green",
+            "Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue",
+            "Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red",
+            "Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red",
+            "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green",
+        );
+
+        assert_eq!(get_answer(test_input.iter().map(|s| s.to_string()).collect()), 2286);
     }
 }
