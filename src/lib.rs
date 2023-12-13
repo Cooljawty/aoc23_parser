@@ -17,7 +17,7 @@ pub mod tokenizer {
         EndOfInput,
     }
 
-    const KEYWORDS:   &'static [&str] = &["red", "green", "blue", "Game"]; 
+    const KEYWORDS:   &'static [&str] = &["Game"]; 
     const SEPERATORS: &'static [&str] = &[";", ":", ","]; 
     const OPERATORS:  &'static [&str] = &["+", "-", "*", "/", "=", "=="]; 
 

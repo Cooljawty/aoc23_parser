@@ -51,7 +51,7 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
     while let Some(token) = input.pop() { 
         tokens.push(token);
         match &tokens[..] {
-            [Token::Count(num), Token::Keyword(color)] if color != "Game"=> {
+            [Token::Count(num), Token::Identifier(color)] => {
                 match color.as_str() {
                     "red" =>  { curr_match.0 = *num; },
                     "green" => { curr_match.1 = *num; },
