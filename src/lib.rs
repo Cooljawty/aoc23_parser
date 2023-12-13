@@ -31,7 +31,7 @@ pub mod tokenizer {
                 if      let Some(keyword) = KEYWORDS.iter().position(|&k| k == input) { Token::Keyword(KEYWORDS[keyword]) }
                 else if let Some(seperator) = SEPERATORS.iter().position(|&s| s == input) { Token::Seperator(SEPERATORS[seperator]) }
                 else if let Some(operator) = OPERATORS.iter().position(|&s| s == input) { Token::Operator(OPERATORS[operator]) }
-                else if let Some(num) =  input.parse::<u32>().into() { Token::Count(num?)}  
+                else if let Ok(num) =  input.parse::<u32>() { Token::Count(num)}  
                 else if input.chars().all(|c| c.is_alphanumeric()) { Token::Identifier(input.to_string()) }
                 else { return Err(ParseTokenError::InvalidToken(input.to_string())); }
             )
