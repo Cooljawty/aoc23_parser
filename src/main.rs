@@ -2,6 +2,7 @@ use reqwest::header::{ USER_AGENT, COOKIE, CONNECTION };
 
 mod day1; 
 mod day2;
+use advent_of_code_2023::tokenizer;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let auth = "53616c7465645f5f64963b27dc1a96e3b498e57c182fdeeaffe976345070fc3d0f22c88c1d91459933897ad530ab45683a294585bdea24b9a034f97ee4c8d46b";
@@ -24,6 +25,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         None => { return Err("Could not get Day 2 input".into()) },
     }
 
+    println!("{:?}", tokenizer::tokenize(&"Game 1: name".to_string()));
     Ok(())
 }
 

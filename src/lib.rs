@@ -7,6 +7,7 @@ pub mod tokenizer {
         Keyword(String),
         Count(u32),
         Seperator(String),
+        Identifier(String),
     }
 
     const KEYWORDS: &'static [&str] = &["red", "green", "blue", "Game"]; 
@@ -21,6 +22,7 @@ pub mod tokenizer {
             Ok( match input {
                 keyword   if KEYWORDS.iter().any(|&k| k == input)   => Token::Keyword(keyword.to_string()),
                 seperator if SEPERATORS.iter().any(|&s| s == input) => Token::Seperator(seperator.to_string()),
+                identifier if identifier.chars().all(|c| c.is_alphanumeric())=> Token::Identifier(identifier.to_string()),
                 num if num.parse::<i32>().is_ok() => Token::Count(num.parse::<u32>().unwrap()), 
                 _ => { return Err(ParseTokenError{}); },
             })
