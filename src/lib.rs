@@ -5,13 +5,15 @@ pub mod tokenizer {
     #[derive(Debug, PartialEq)]
     pub enum Token {
         Keyword(String),
-        Count(u32),
         Seperator(String),
+        Operator(String),
         Identifier(String),
+        Count(u32),
     }
 
-    const KEYWORDS: &'static [&str] = &["red", "green", "blue", "Game"]; 
+    const KEYWORDS:   &'static [&str] = &["red", "green", "blue", "Game"]; 
     const SEPERATORS: &'static [&str] = &[";", ":", ","]; 
+    const OPERATORS:  &'static [&str] = &["+", "-", "*", "/", "=", "=="]; 
 
     ///Strictly parses string to single token.
     ///Assumes that tokens are mutualy exlusive
@@ -22,6 +24,7 @@ pub mod tokenizer {
             Ok( match input {
                 keyword   if KEYWORDS.iter().any(|&k| k == input)   => Token::Keyword(keyword.to_string()),
                 seperator if SEPERATORS.iter().any(|&s| s == input) => Token::Seperator(seperator.to_string()),
+                operator if OPERATORS.iter().any(|&s| s == input) => Token::Operator(operator.to_string()),
                 identifier if identifier.chars().all(|c| c.is_alphanumeric())=> Token::Identifier(identifier.to_string()),
                 num if num.parse::<i32>().is_ok() => Token::Count(num.parse::<u32>().unwrap()), 
                 _ => { return Err(ParseTokenError{}); },
