@@ -25,7 +25,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         None => { return Err("Could not get Day 2 input".into()) },
     }
 
-    println!("{:?}", tokenizer::tokenize(&"Game 1: name + name == name ===".to_string()));
+    println!("{:?}", tokenizer::tokenize(&"Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green".to_string()));
     Ok(())
 }
 
