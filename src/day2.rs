@@ -183,6 +183,6 @@ mod tests {
         );
 
         let result = get_answer(test_input.iter().map(|s| s.to_string()).collect());
-        assert_eq!(result, 8, "Expected {:?}, got {:?}", 2286, result); 
+        assert_eq!(result, 2286, "Expected {:?}, got {:?}", 2286, result); 
     }
 }
