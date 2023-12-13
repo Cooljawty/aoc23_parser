@@ -46,13 +46,12 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
     let mut matches = Vec::<(u32, u32, u32)>::new();
     let mut curr_match = (0,0,0);
 
+    println!("{input:?}");
     let mut tokens = Vec::<Token>::new();
     while let Some(token) = input.pop() { 
         tokens.push(token);
-        println!("{tokens:?}");
         match &tokens[..] {
-            [Token::Keyword(color), Token::Count(num)] if color != "Game"=> {
-                println!("{color} is {num}");
+            [Token::Count(num), Token::Keyword(color)] if color != "Game"=> {
                 match color.as_str() {
                     "red" =>  { curr_match.0 = *num; },
                     "green" => { curr_match.1 = *num; },
@@ -65,7 +64,6 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
                 match s.as_str() {
                     ";" => {
                         matches.push(curr_match);
-                        println!("result is {curr_match:?}, {matches:?}");
                         curr_match = (0,0,0);
                         tokens.clear();
                     },
@@ -76,22 +74,21 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
                     _ => {continue}
                 }
             }
-            [ Token::Seperator(s), Token::Count(num), Token::Keyword(k)] if k == "Game" && s == ":" => {
-                println!("Game index is {num}");
-                matches.push(curr_match);
-                curr_match = (0,0,0);
+            [Token::Keyword(k) , Token::Count(num), Token::Seperator(s)] if k == "Game" && s == ":" => {
                 *index = *num;
             }
+            [Token::EndOfInput] => { 
+                matches.push(curr_match); 
+                curr_match = (0, 0, 0);
+                tokens.clear(); },
             _ => {continue},
         }
 
         //Clear stack when rule is met
         tokens.clear();
     }
+    println!("{matches:?}");
 
-    println!("matches: {matches:?}");
-    matches.reverse();
-    
     matches
 }
 

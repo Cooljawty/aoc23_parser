@@ -14,6 +14,7 @@ pub mod tokenizer {
         Operator(String),
         Identifier(String),
         Count(u32),
+        EndOfInput,
     }
 
     const KEYWORDS:   &'static [&str] = &["red", "green", "blue", "Game"]; 
@@ -73,7 +74,7 @@ pub mod tokenizer {
                     curr_token = Some(matching_token);
                     marker += 1;
                 } else if let Some(token) = curr_token {
-                    token_stack.push(token);
+                    token_stack.insert(0, token);
                     input.replace_range(0..marker-1, "");
 
                     marker = 0usize;
@@ -83,10 +84,11 @@ pub mod tokenizer {
                 }
             }
             if let Some(token) = curr_token {
-                token_stack.push(token);
+                token_stack.insert(0, token);
             }
         }
 
+        token_stack.insert(0, Token::EndOfInput);
         Ok(token_stack)
     }
 }
