@@ -9,9 +9,9 @@ pub mod tokenizer {
 
     #[derive(Debug, PartialEq)]
     pub enum Token {
-        Keyword(String),
-        Seperator(String),
-        Operator(String),
+        Keyword(&'static str),
+        Seperator(&'static str),
+        Operator(&'static str),
         Identifier(String),
         Count(u32),
         EndOfInput,
@@ -27,14 +27,14 @@ pub mod tokenizer {
         type Err = ParseTokenError;
 
         fn from_str(input: &str) -> Result<Self, Self::Err> {
-            Ok( match input {
-                keyword   if KEYWORDS.iter().any(|&k| k == input)   => Token::Keyword(keyword.to_string()),
-                seperator if SEPERATORS.iter().any(|&s| s == input) => Token::Seperator(seperator.to_string()),
-                operator if OPERATORS.iter().any(|&s| s == input) => Token::Operator(operator.to_string()),
-                num if num.parse::<i32>().is_ok() => Token::Count(num.parse::<u32>().unwrap()), 
-                identifier if identifier.chars().all(|c| c.is_alphanumeric())=> Token::Identifier(identifier.to_string()),
-                e => { return Err(ParseTokenError::InvalidToken(e.to_string())); },
-            })
+            Ok(
+                if      let Some(keyword) = KEYWORDS.iter().position(|&k| k == input) { Token::Keyword(KEYWORDS[keyword]) }
+                else if let Some(seperator) = SEPERATORS.iter().position(|&s| s == input) { Token::Seperator(SEPERATORS[seperator]) }
+                else if let Some(operator) = OPERATORS.iter().position(|&s| s == input) { Token::Operator(OPERATORS[operator]) }
+                else if let Some(num) =  input.parse::<u32>().into() { Token::Count(num?)}  
+                else if input.chars().all(|c| c.is_alphanumeric()) { Token::Identifier(input.to_string()) }
+                else { return Err(ParseTokenError::InvalidToken(input.to_string())); }
+            )
         }
     }
 
@@ -42,6 +42,7 @@ pub mod tokenizer {
     ///The two possible errors from the tokenizer is an invalid token or some I/O error
     pub enum ParseTokenError {
        InvalidToken(String),
+       ParseIntError(std::num::ParseIntError),
        IoError(std::io::Error),
     }
 
@@ -50,9 +51,15 @@ pub mod tokenizer {
         fn fmt(&self, f: &mut Formatter) -> fmt::Result {
             match self {
                 Self::IoError(e) => write!(f, "IO error: {e}"),
+                Self::ParseIntError(e) => write!(f, "Failed to convert to integer: {e}"),
                 Self::InvalidToken(t) => write!(f, "Cannot parse \"{t}\"  into a token"),
             }
         }
+    }
+    impl From<std::num::ParseIntError> for ParseTokenError {
+        fn from(err: std::num::ParseIntError) -> ParseTokenError {
+            ParseTokenError::ParseIntError(err)
+        }    
     }
     impl From<std::io::Error> for ParseTokenError {
         fn from(err: io::Error) -> ParseTokenError {
