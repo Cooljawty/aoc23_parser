@@ -24,7 +24,6 @@ pub fn get_answer_part_1(input: Vec<String>) -> u32{
 pub fn get_answer(input: Vec<String>) -> u32{
     let mut sum = 0;
     for line in input {
-        println!("{}", line);
         let mut index: u32 = 0;
         let mut color_count = (0,0,0);
         for result in parse_input(&line, &mut index).unwrap() {
@@ -33,10 +32,8 @@ pub fn get_answer(input: Vec<String>) -> u32{
                 cmp::max(result.1, color_count.1), 
                 cmp::max(result.2, color_count.2)
             );
-            //println!("Result: {:?}, {:?}", result, color_count);
         }
         let power = color_count.0 * color_count.1 * color_count.2; 
-        //println!("Power: {power}");
         sum += power;
     }
 
@@ -44,25 +41,28 @@ pub fn get_answer(input: Vec<String>) -> u32{
 }
 
 fn parse_input(input: &String, index: &mut u32) -> Option<Vec<(u32, u32, u32)>> {
-
+    let mut input = input.clone();
     let mut token_stack = Vec::<Token>::new();
 
-    let mut word = String::new();
-    for c in input.chars() {
-        if c.is_whitespace() {
-            word.clear();
-            continue;
-        }
+    let mut curr_token = None;
 
-        word.push(c);
-        match word.parse::<Token>().ok() {
-            Some(token) => { 
-                token_stack.push(token); 
-                word.clear();
-                continue;
-            },
-            None => {},
+    let mut marker = 0usize;
+    while let Some(input_view) = input.get(0..marker) {
+        if let Some(matching_token) = input_view.trim().parse::<Token>().ok() {
+            curr_token = Some(matching_token);
+            marker += 1;
+        } else if let Some(token) = curr_token {
+            token_stack.push(token);
+            input.replace_range(0..marker-1, "");
+
+            marker = 0usize;
+            curr_token = None;
+        } else { 
+            marker += 1; 
         }
+    }
+    if let Some(token) = curr_token {
+        token_stack.push(token);
     }
 
     get_result(token_stack)
@@ -151,7 +151,9 @@ mod tests {
 
         for (input, output, _) in test_values{
             let mut index = 0;
-            assert_eq!(parse_input(&input.to_string(), &mut index), Some(output), "Parser error"); 
+            let result = parse_input(&input.to_string(), &mut index);
+            assert_eq!(result, Some(output.clone()), 
+                "Expected {:?}, got {:?}", output, result); 
         }
 
 
@@ -166,8 +168,8 @@ mod tests {
             "Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red",
             "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green",
         );
-
-        assert_eq!(get_answer_part_1(test_input.iter().map(|s| s.to_string()).collect()), 8);
+        let result = get_answer_part_1(test_input.iter().map(|s| s.to_string()).collect());
+        assert_eq!(result, 8, "Expected {:?}, got {:?}", 8, result); 
     }
 
     #[test]
@@ -180,6 +182,7 @@ mod tests {
             "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green",
         );
 
-        assert_eq!(get_answer(test_input.iter().map(|s| s.to_string()).collect()), 2286);
+        let result = get_answer(test_input.iter().map(|s| s.to_string()).collect());
+        assert_eq!(result, 8, "Expected {:?}, got {:?}", 2286, result); 
     }
 }
