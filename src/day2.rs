@@ -24,7 +24,6 @@ pub fn get_answer_part_1(input: Vec<String>) -> Result<u32, Box<dyn std::error::
 pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>> {
     let mut sum = 0;
     for line in input {
-        println!("{line}");
         let mut index: u32 = 0;
         let mut color_count = (0,0,0);
         for result in get_result(tokenize(line.as_bytes())?, &mut index) {
@@ -46,7 +45,6 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
     let mut matches = Vec::<(u32, u32, u32)>::new();
     let mut curr_match = (0,0,0);
 
-    println!("{input:?}");
     let mut tokens = Vec::<Token>::new();
     while let Some(token) = input.pop() { 
         tokens.push(token);
@@ -60,21 +58,16 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
                 };
                 
             },
-            [Token::Seperator(s)] => {
-                match s.as_str() {
-                    ";" => {
-                        matches.push(curr_match);
-                        curr_match = (0,0,0);
-                        tokens.clear();
-                    },
-                    "," => {
-                        //Ignore colon for now
-                        tokens.clear();
-                    },
-                    _ => {continue}
-                }
-            }
-            [Token::Keyword(k) , Token::Count(num), Token::Seperator(s)] if k == "Game" && s == ":" => {
+            [Token::Seperator(";")] => {
+                matches.push(curr_match);
+                curr_match = (0,0,0);
+                tokens.clear();
+            },
+            [Token::Seperator(",")] => {
+                //Ignore colon for now
+                tokens.clear();
+            },
+            [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => {
                 *index = *num;
             }
             [Token::EndOfInput] => { 
@@ -87,7 +80,6 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
         //Clear stack when rule is met
         tokens.clear();
     }
-    println!("{matches:?}");
 
     matches
 }
