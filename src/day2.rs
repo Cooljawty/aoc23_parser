@@ -1,13 +1,13 @@
 use std::cmp;
 
-use advent_of_code_2023::tokenizer::Token;
+use advent_of_code_2023::tokenizer::{Token, tokenize};
 
 #[allow(dead_code)]
 pub fn get_answer_part_1(input: Vec<String>) -> u32{
     let mut sum = 0;
     'line: for line in input {
         let mut index: u32 = 0;
-        for result in parse_input(&line, &mut index).unwrap() {
+        for result in get_result(tokenize(&line), &mut index).unwrap() {
             match result {
                 (r, g, b) if r > 12 || g > 13 || b > 14 => { 
                     continue 'line;
@@ -26,7 +26,7 @@ pub fn get_answer(input: Vec<String>) -> u32{
     for line in input {
         let mut index: u32 = 0;
         let mut color_count = (0,0,0);
-        for result in parse_input(&line, &mut index).unwrap() {
+        for result in get_result(tokenize(&line), &mut index).unwrap() {
             color_count = (
                 cmp::max(result.0, color_count.0), 
                 cmp::max(result.1, color_count.1), 
@@ -38,35 +38,6 @@ pub fn get_answer(input: Vec<String>) -> u32{
     }
 
     return sum;
-}
-
-fn parse_input(input: &String, index: &mut u32) -> Option<Vec<(u32, u32, u32)>> {
-    let mut input = input.clone();
-    let mut token_stack = Vec::<Token>::new();
-
-    let mut curr_token = None;
-
-    let mut marker = 0usize;
-    while let Some(input_view) = input.get(0..marker) {
-        if let Some(matching_token) = input_view.trim().parse::<Token>().ok() {
-            curr_token = Some(matching_token);
-            marker += 1;
-        } else if let Some(token) = curr_token {
-            token_stack.push(token);
-            input.replace_range(0..marker-1, "");
-
-            marker = 0usize;
-            curr_token = None;
-        } else { 
-            marker += 1; 
-        }
-    }
-    if let Some(token) = curr_token {
-        token_stack.push(token);
-    }
-
-    get_result(token_stack, index)
-
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -142,26 +113,6 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Option<Vec<(u32, u32, u
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn parser() {
-        let test_values = vec!(
-            ("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green", vec!((4,0,3),(1,2,6),(0,2,0)), true),
-            ("Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue", vec!((0,2,1),(1,3,4),(0,1,1)), true),
-            ("Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red", vec!((20,8,6),(4,13,5),(1,5,0)), false),
-            ("Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red", vec!((3,1,6),(6,3,0),(14,3,15)), false),
-            ("Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green", vec!((6,3,1),(1,2,2)), true),
-        );
-
-        for (input, output, _) in test_values{
-            let mut index = 0;
-            let result = parse_input(&input.to_string(), &mut index);
-            assert_eq!(result, Some(output.clone()), 
-                "Expected {:?}, got {:?}", output, result); 
-        }
-
-
-    }
 
     #[test]
     fn part1() {
