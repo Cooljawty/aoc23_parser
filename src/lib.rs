@@ -34,8 +34,8 @@ pub mod tokenizer {
     pub struct ParseTokenError {}
 
     ///Takes in input string and outputs a stream of tokens
-    pub fn tokenize(input: &String) -> Vec<Token> {
-        let mut input = input.clone();
+    pub fn tokenize(input: &str) -> Vec<Token> {
+        let mut input = input.to_string();
         let mut token_stack = Vec::<Token>::new();
 
         let mut curr_token = None;
