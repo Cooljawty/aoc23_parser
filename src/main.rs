@@ -2,7 +2,6 @@ use reqwest::header::{ USER_AGENT, COOKIE, CONNECTION };
 
 mod day1; 
 mod day2;
-use advent_of_code_2023::tokenizer;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let auth = "53616c7465645f5f64963b27dc1a96e3b498e57c182fdeeaffe976345070fc3d0f22c88c1d91459933897ad530ab45683a294585bdea24b9a034f97ee4c8d46b";
@@ -21,11 +20,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     //Solve Day 2 part 1
     match puzzle_input.next() {
-        Some(src) => { println!("Day 2: {}", day2::get_answer(src)) },
+        Some(src) => { println!("Day 2: {}", day2::get_answer(src)?) },
         None => { return Err("Could not get Day 2 input".into()) },
     }
 
-    println!("{:?}", tokenizer::tokenize(&"Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green".to_string()));
     Ok(())
 }
 

@@ -3,11 +3,11 @@ use std::cmp;
 use advent_of_code_2023::tokenizer::{Token, tokenize};
 
 #[allow(dead_code)]
-pub fn get_answer_part_1(input: Vec<String>) -> u32{
+pub fn get_answer_part_1(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>>{
     let mut sum = 0;
     'line: for line in input {
         let mut index: u32 = 0;
-        for result in get_result(tokenize(&line), &mut index).unwrap() {
+        for result in get_result(tokenize(line.as_bytes())?, &mut index) {
             match result {
                 (r, g, b) if r > 12 || g > 13 || b > 14 => { 
                     continue 'line;
@@ -18,15 +18,15 @@ pub fn get_answer_part_1(input: Vec<String>) -> u32{
         sum += index;
     }
 
-    return sum;
+    Ok(sum)
 }
 
-pub fn get_answer(input: Vec<String>) -> u32{
+pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>> {
     let mut sum = 0;
     for line in input {
         let mut index: u32 = 0;
         let mut color_count = (0,0,0);
-        for result in get_result(tokenize(&line), &mut index).unwrap() {
+        for result in get_result(tokenize(line.as_bytes())?, &mut index) {
             color_count = (
                 cmp::max(result.0, color_count.0), 
                 cmp::max(result.1, color_count.1), 
@@ -37,12 +37,12 @@ pub fn get_answer(input: Vec<String>) -> u32{
         sum += power;
     }
 
-    return sum;
+    Ok(sum)
 }
 
 #[derive(Debug, PartialEq, Eq)]
 enum Color { Red, Green, Blue }
-fn get_result(mut input: Vec<Token>, index: &mut u32) -> Option<Vec<(u32, u32, u32)>> {
+fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
     //Evaluate stack
     let mut count: u32 = 0;
     let mut curr_color: Option<Color> = None;
@@ -106,7 +106,7 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Option<Vec<(u32, u32, u
     }
     matches.reverse();
     
-    Some(matches)
+    matches
 
 }
 
