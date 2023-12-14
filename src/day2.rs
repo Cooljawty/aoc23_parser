@@ -42,15 +42,16 @@ pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>>
 
 fn get_result(input: String, index: &mut u32) -> Result<Vec<(u32, u32, u32)>, Box<dyn std::error::Error>> {
     let tokens = tokenize(input.as_bytes())?;
-    let instructions = parse_tokens(tokens);
+    let instructions = parse_tokens(tokens)?;
     let result = evaluate_stack(instructions, index);
 
     Ok(result)
 }
 
-fn parse_tokens(input: Vec<Token>) -> Vec<Instruction> {
+use advent_of_code_2023::tokenizer::ParseTokenError;
+fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::error::Error>> {
     let mut tokens = Vec::<&Token>::new();
-    input.iter().flat_map(|token| { 
+    let instructions = input.iter().map(|token| { 
         tokens.push(token);
         let instructions = match &tokens[..] {
             [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => vec!(Instruction::Index(*num), Instruction::Collect),
@@ -59,18 +60,23 @@ fn parse_tokens(input: Vec<Token>) -> Vec<Instruction> {
                 "red" => vec!(Instruction::Red(*num)),
                 "green" => vec!(Instruction::Green(*num)),
                 "blue" => vec!(Instruction::Blue(*num)),
-                _ => {panic!("Loose color matching. {color} is not a valid color!")}
+                _ => { return Err(ParseTokenError::InvalidToken(color.to_string())) }
             },
             [Token::Seperator(",")] => vec!(),
             [Token::Seperator(";") | Token::EndOfInput] => vec!(Instruction::Collect),
-            _ => { return vec!() },
+            _ => { return Ok(vec!()) },
         };
 
-        println!("tokens: {tokens:?} => instructions: {instructions:?}");
         tokens.clear(); 
 
-        instructions
-    }).collect()
+        Ok(instructions)
+    })
+    .collect::<Result<Vec<_>, _>>()?
+    .into_iter()
+    .flatten()
+    .collect();
+
+    Ok(instructions)
 }
 
 #[derive(Debug)]
@@ -126,7 +132,7 @@ mod tests {
         let test_input = vec!(
             "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green",
             "Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue",
-            "Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red",
+            "Game 3: 8 orange, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red",
             "Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red",
             "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green",
         );
