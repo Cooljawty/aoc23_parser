@@ -43,7 +43,7 @@ pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>>
 fn get_result(input: String, index: &mut u32) -> Result<Vec<(u32, u32, u32)>, Box<dyn std::error::Error>> {
     let tokens = tokenize(input.as_bytes())?;
     let instructions = parse_tokens(tokens)?;
-    let result = evaluate_stack(instructions, index);
+    let result = evaluate_stack(instructions, index)?;
 
     Ok(result)
 }
@@ -81,10 +81,10 @@ fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::erro
 
 #[derive(Debug)]
 enum Instruction { Index(u32), Red(u32), Green(u32), Blue(u32), Collect}
-fn evaluate_stack(stack: Vec<Instruction>, index: &mut u32) -> Vec<(u32, u32, u32)> {
+fn evaluate_stack(stack: Vec<Instruction>, index: &mut u32) -> Result<Vec<(u32, u32, u32)>, Box<dyn std::error::Error>> {
     //Evaluate stack
     let mut curr_match = (0,0,0);
-    stack.iter().flat_map(|instruction| match instruction { 
+    let results = stack.iter().flat_map(|instruction| match instruction { 
         Instruction::Index(num) => { 
             *index = *num; 
             vec!()
@@ -106,7 +106,9 @@ fn evaluate_stack(stack: Vec<Instruction>, index: &mut u32) -> Vec<(u32, u32, u3
             curr_match = (0,0,0); 
             vec!(tmp)
         }
-    }).collect()
+    }).collect();
+
+    Ok(results)
 }
 
 #[cfg(test)]
