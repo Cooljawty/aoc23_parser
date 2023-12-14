@@ -40,8 +40,6 @@ pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>>
     Ok(sum)
 }
 
-#[derive(Debug)]
-enum Symbol { Index(u32), Red(u32), Green(u32), Blue(u32), Match}
 fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
     let mut tokens = Vec::<Token>::new();
     let mut stack = Vec::<Symbol>::new();
@@ -70,23 +68,34 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
     evaluate_stack(stack, index)
 }
 
-fn evaluate_stack(mut stack: Vec<Symbol>, index: &mut u32) -> Vec<(u32, u32, u32)> {
+#[derive(Debug)]
+enum Symbol { Index(u32), Red(u32), Green(u32), Blue(u32), Match}
+fn evaluate_stack(stack: Vec<Symbol>, index: &mut u32) -> Vec<(u32, u32, u32)> {
     //Evaluate stack
     let mut curr_match = (0,0,0);
-    let mut matches = Vec::<(u32, u32, u32)>::new();
-    while let Some(symbol) = stack.pop() {
-        match symbol { 
-            Symbol::Index(num) => { *index = num; }, 
-            Symbol::Red(num) => { curr_match.0 = num; },
-            Symbol::Green(num) => { curr_match.1 = num; }, 
-            Symbol::Blue(num) => { curr_match.2 = num; }, 
-            Symbol::Match => { 
-                matches.push(curr_match); 
-                curr_match = (0,0,0); 
-            }
+    println!("{stack:?}");
+    stack.iter().filter_map(|symbol| match symbol { 
+        Symbol::Index(num) => { 
+            *index = *num; 
+            None
+        }, 
+        Symbol::Red(num) => { curr_match.0 = *num;
+            None
+        },
+        Symbol::Green(num) => { 
+            curr_match.1 = *num;
+            None
+        }, 
+        Symbol::Blue(num) => { 
+            curr_match.2 = *num; 
+            None
+        }, 
+        Symbol::Match => { 
+            let tmp = curr_match;
+            curr_match = (0,0,0); 
+            Some(tmp)
         }
-    }
-    matches
+    }).collect()
 }
 
 #[cfg(test)]
