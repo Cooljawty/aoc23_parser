@@ -42,58 +42,59 @@ pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>>
 
 fn get_result(input: String, index: &mut u32) -> Result<Vec<(u32, u32, u32)>, Box<dyn std::error::Error>> {
     let tokens = tokenize(input.as_bytes())?;
-    let symbols = parse_tokens(tokens);
-    let result = evaluate_stack(symbols, index);
+    let instructions = parse_tokens(tokens);
+    let result = evaluate_stack(instructions, index);
 
     Ok(result)
 }
 
-fn parse_tokens(input: Vec<Token>) -> Vec<Symbol> {
+fn parse_tokens(input: Vec<Token>) -> Vec<Instruction> {
     let mut tokens = Vec::<&Token>::new();
     input.iter().flat_map(|token| { 
         tokens.push(token);
-        let symbols = match &tokens[..] {
+        let instructions = match &tokens[..] {
             [Token::Count(num), Token::Identifier(color)] => match color.as_str() {
-                "red" => vec!(Symbol::Red(*num)),
-                "green" => vec!(Symbol::Green(*num)),
-                "blue" => vec!(Symbol::Blue(*num)),
+                "red" => vec!(Instruction::Red(*num)),
+                "green" => vec!(Instruction::Green(*num)),
+                "blue" => vec!(Instruction::Blue(*num)),
                 _ => {panic!("Loose color matching. {color} is not a valid color!")}
             },
-            [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => vec!(Symbol::Index(*num), Symbol::Match),
-            [Token::Seperator(";") | Token::EndOfInput] => { vec!(Symbol::Match) },
-            [Token::Seperator(",")] => { Vec::<Symbol>::new() },//continue; },
-            _ => { return Vec::<Symbol>::new() },//continue; },
+            [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => vec!(Instruction::Index(*num), Instruction::Collect),
+            [Token::Seperator(";") | Token::EndOfInput] => { vec!(Instruction::Collect) },
+            [Token::Seperator(",")] => { Vec::<Instruction>::new() },//continue; },
+            _ => { return Vec::<Instruction>::new() },//continue; },
         };
 
-        println!("tokens: {tokens:?} => symbols: {symbols:?}");
+        println!("tokens: {tokens:?} => instructions: {instructions:?}");
         tokens.clear(); 
 
-        symbols
+        instructions
     }).collect()
 }
 
 #[derive(Debug)]
-enum Symbol { Index(u32), Red(u32), Green(u32), Blue(u32), Match}
-fn evaluate_stack(stack: Vec<Symbol>, index: &mut u32) -> Vec<(u32, u32, u32)> {
+enum Instruction { Index(u32), Red(u32), Green(u32), Blue(u32), Collect}
+fn evaluate_stack(stack: Vec<Instruction>, index: &mut u32) -> Vec<(u32, u32, u32)> {
     //Evaluate stack
     let mut curr_match = (0,0,0);
-    stack.iter().flat_map(|symbol| match symbol { 
-        Symbol::Index(num) => { 
+    stack.iter().flat_map(|instruction| match instruction { 
+        Instruction::Index(num) => { 
             *index = *num; 
             Vec::<(u32,u32,u32)>::new()
         }, 
-        Symbol::Red(num) => { curr_match.0 = *num;
+        Instruction::Red(num) => { 
+            curr_match.0 = *num;
             Vec::<(u32,u32,u32)>::new()
         },
-        Symbol::Green(num) => { 
+        Instruction::Green(num) => { 
             curr_match.1 = *num;
             Vec::<(u32,u32,u32)>::new()
         }, 
-        Symbol::Blue(num) => { 
+        Instruction::Blue(num) => { 
             curr_match.2 = *num; 
             Vec::<(u32,u32,u32)>::new()
         }, 
-        Symbol::Match => { 
+        Instruction::Collect => { 
             let tmp = curr_match;
             curr_match = (0,0,0); 
             vec!(tmp)
