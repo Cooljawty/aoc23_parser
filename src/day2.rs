@@ -71,26 +71,26 @@ enum Symbol { Index(u32), Red(u32), Green(u32), Blue(u32), Match}
 fn evaluate_stack(stack: Vec<Symbol>, index: &mut u32) -> Vec<(u32, u32, u32)> {
     //Evaluate stack
     let mut curr_match = (0,0,0);
-    stack.iter().filter_map(|symbol| match symbol { 
+    stack.iter().flat_map(|symbol| match symbol { 
         Symbol::Index(num) => { 
             *index = *num; 
-            None
+            Vec::<(u32,u32,u32)>::new()
         }, 
         Symbol::Red(num) => { curr_match.0 = *num;
-            None
+            Vec::<(u32,u32,u32)>::new()
         },
         Symbol::Green(num) => { 
             curr_match.1 = *num;
-            None
+            Vec::<(u32,u32,u32)>::new()
         }, 
         Symbol::Blue(num) => { 
             curr_match.2 = *num; 
-            None
+            Vec::<(u32,u32,u32)>::new()
         }, 
         Symbol::Match => { 
             let tmp = curr_match;
             curr_match = (0,0,0); 
-            Some(tmp)
+            vec!(tmp)
         }
     }).collect()
 }
