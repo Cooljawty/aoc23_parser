@@ -53,16 +53,17 @@ fn parse_tokens(input: Vec<Token>) -> Vec<Instruction> {
     input.iter().flat_map(|token| { 
         tokens.push(token);
         let instructions = match &tokens[..] {
-            [Token::Count(num), Token::Identifier(color)] => match color.as_str() {
+            [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => vec!(Instruction::Index(*num), Instruction::Collect),
+            [Token::Count(num), Token::Identifier(color)] => match color.as_str() 
+            {
                 "red" => vec!(Instruction::Red(*num)),
                 "green" => vec!(Instruction::Green(*num)),
                 "blue" => vec!(Instruction::Blue(*num)),
                 _ => {panic!("Loose color matching. {color} is not a valid color!")}
             },
-            [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => vec!(Instruction::Index(*num), Instruction::Collect),
-            [Token::Seperator(";") | Token::EndOfInput] => { vec!(Instruction::Collect) },
-            [Token::Seperator(",")] => { Vec::<Instruction>::new() },//continue; },
-            _ => { return Vec::<Instruction>::new() },//continue; },
+            [Token::Seperator(",")] => vec!(),
+            [Token::Seperator(";") | Token::EndOfInput] => vec!(Instruction::Collect),
+            _ => { return vec!() },
         };
 
         println!("tokens: {tokens:?} => instructions: {instructions:?}");
@@ -80,19 +81,19 @@ fn evaluate_stack(stack: Vec<Instruction>, index: &mut u32) -> Vec<(u32, u32, u3
     stack.iter().flat_map(|instruction| match instruction { 
         Instruction::Index(num) => { 
             *index = *num; 
-            Vec::<(u32,u32,u32)>::new()
+            vec!()
         }, 
         Instruction::Red(num) => { 
             curr_match.0 = *num;
-            Vec::<(u32,u32,u32)>::new()
+            vec!()
         },
         Instruction::Green(num) => { 
             curr_match.1 = *num;
-            Vec::<(u32,u32,u32)>::new()
+            vec!()
         }, 
         Instruction::Blue(num) => { 
             curr_match.2 = *num; 
-            Vec::<(u32,u32,u32)>::new()
+            vec!()
         }, 
         Instruction::Collect => { 
             let tmp = curr_match;
