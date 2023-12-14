@@ -40,13 +40,11 @@ pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>>
     Ok(sum)
 }
 
-fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
-    let mut tokens = Vec::<Token>::new();
-    let mut stack = Vec::<Symbol>::new();
-    
-    while let Some(token) = input.pop() { 
+fn get_result(input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
+    let mut tokens = Vec::<&Token>::new();
+    let stack = input.iter().flat_map(|token| { 
         tokens.push(token);
-        for symbol in match &tokens[..] {
+        let symbols = match &tokens[..] {
             [Token::Count(num), Token::Identifier(color)] => match color.as_str() {
                 "red" => vec!(Symbol::Red(*num)),
                 "green" => vec!(Symbol::Green(*num)),
@@ -54,16 +52,16 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
                 _ => {panic!("Loose color matching. {color} is not a valid color!")}
             },
             [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => vec!(Symbol::Index(*num), Symbol::Match),
-            [Token::Seperator(";") | Token::EndOfInput] => { tokens.clear(); vec!(Symbol::Match) },
-            [Token::Seperator(",")] => { tokens.clear(); continue; },
-            _ => { continue; },
-        } { 
-            stack.push(symbol); 
+            [Token::Seperator(";") | Token::EndOfInput] => { vec!(Symbol::Match) },
+            [Token::Seperator(",")] => { Vec::<Symbol>::new() },//continue; },
+            _ => { return Vec::<Symbol>::new() },//continue; },
+        };
 
-            //Clear stack when rule is met
-            tokens.clear();
-        }
-    }
+        println!("tokens: {tokens:?} => symbols: {symbols:?}");
+        tokens.clear(); 
+
+        symbols
+    }).collect();
 
     evaluate_stack(stack, index)
 }
@@ -73,7 +71,6 @@ enum Symbol { Index(u32), Red(u32), Green(u32), Blue(u32), Match}
 fn evaluate_stack(stack: Vec<Symbol>, index: &mut u32) -> Vec<(u32, u32, u32)> {
     //Evaluate stack
     let mut curr_match = (0,0,0);
-    println!("{stack:?}");
     stack.iter().filter_map(|symbol| match symbol { 
         Symbol::Index(num) => { 
             *index = *num; 
