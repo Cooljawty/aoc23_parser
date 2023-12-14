@@ -7,7 +7,7 @@ pub fn get_answer_part_1(input: Vec<String>) -> Result<u32, Box<dyn std::error::
     let mut sum = 0;
     'line: for line in input {
         let mut index: u32 = 0;
-        for result in get_result(tokenize(line.as_bytes())?, &mut index) {
+        for result in get_result(line, &mut index)? {
             match result {
                 (r, g, b) if r > 12 || g > 13 || b > 14 => { 
                     continue 'line;
@@ -26,7 +26,7 @@ pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>>
     for line in input {
         let mut index: u32 = 0;
         let mut color_count = (0,0,0);
-        for result in get_result(tokenize(line.as_bytes())?, &mut index) {
+        for result in get_result(line, &mut index)? {
             color_count = (
                 cmp::max(result.0, color_count.0), 
                 cmp::max(result.1, color_count.1), 
@@ -40,9 +40,17 @@ pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>>
     Ok(sum)
 }
 
-fn get_result(input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
+fn get_result(input: String, index: &mut u32) -> Result<Vec<(u32, u32, u32)>, Box<dyn std::error::Error>> {
+    let tokens = tokenize(input.as_bytes())?;
+    let symbols = parse_tokens(tokens);
+    let result = evaluate_stack(symbols, index);
+
+    Ok(result)
+}
+
+fn parse_tokens(input: Vec<Token>) -> Vec<Symbol> {
     let mut tokens = Vec::<&Token>::new();
-    let stack = input.iter().flat_map(|token| { 
+    input.iter().flat_map(|token| { 
         tokens.push(token);
         let symbols = match &tokens[..] {
             [Token::Count(num), Token::Identifier(color)] => match color.as_str() {
@@ -61,9 +69,7 @@ fn get_result(input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
         tokens.clear(); 
 
         symbols
-    }).collect();
-
-    evaluate_stack(stack, index)
+    }).collect()
 }
 
 #[derive(Debug)]
