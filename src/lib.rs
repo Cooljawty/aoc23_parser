@@ -21,52 +21,6 @@ pub mod tokenizer {
     const SEPERATORS: &'static [&str] = &[";", ":", ","]; 
     const OPERATORS:  &'static [&str] = &["+", "-", "*", "/", "=", "=="]; 
 
-    ///Strictly parses string to single token.
-    ///Assumes that tokens are mutualy exlusive
-    impl FromStr for Token {
-        type Err = ParseTokenError;
-
-        fn from_str(input: &str) -> Result<Self, Self::Err> {
-            Ok(
-                if      let Some(keyword) = KEYWORDS.iter().position(|&k| k == input) { Token::Keyword(KEYWORDS[keyword]) }
-                else if let Some(seperator) = SEPERATORS.iter().position(|&s| s == input) { Token::Seperator(SEPERATORS[seperator]) }
-                else if let Some(operator) = OPERATORS.iter().position(|&s| s == input) { Token::Operator(OPERATORS[operator]) }
-                else if let Ok(num) =  input.parse::<u32>() { Token::Count(num)}  
-                else if input.chars().all(|c| c.is_alphanumeric()) { Token::Identifier(input.to_string()) }
-                else { return Err(ParseTokenError::InvalidToken(input.to_string())); }
-            )
-        }
-    }
-
-    #[derive(Debug)]
-    ///The two possible errors from the tokenizer is an invalid token or some I/O error
-    pub enum ParseTokenError {
-       InvalidToken(String),
-       ParseIntError(std::num::ParseIntError),
-       IoError(std::io::Error),
-    }
-
-    impl Error for ParseTokenError {}
-    impl Display for ParseTokenError {
-        fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-            match self {
-                Self::IoError(e) => write!(f, "IO error: {e}"),
-                Self::ParseIntError(e) => write!(f, "Failed to convert to integer: {e}"),
-                Self::InvalidToken(t) => write!(f, "Cannot parse \"{t}\"  into a token"),
-            }
-        }
-    }
-    impl From<std::num::ParseIntError> for ParseTokenError {
-        fn from(err: std::num::ParseIntError) -> ParseTokenError {
-            ParseTokenError::ParseIntError(err)
-        }    
-    }
-    impl From<std::io::Error> for ParseTokenError {
-        fn from(err: io::Error) -> ParseTokenError {
-            ParseTokenError::IoError(err)
-        }    
-    }
-
     ///Takes in input buffer and outputs a stream of tokens
     pub fn tokenize(input: impl BufRead) -> Result<Vec<Token>, ParseTokenError> {
         let mut token_stack = Vec::<Token>::new();
@@ -97,5 +51,50 @@ pub mod tokenizer {
 
         token_stack.insert(0, Token::EndOfInput);
         Ok(token_stack)
+    }
+
+    ///Strictly parses string to single token.
+    ///Assumes that tokens are mutualy exlusive
+    impl FromStr for Token {
+        type Err = ParseTokenError;
+
+        fn from_str(input: &str) -> Result<Self, Self::Err> {
+            Ok(
+                if      let Some(keyword) = KEYWORDS.iter().position(|&k| k == input) { Token::Keyword(KEYWORDS[keyword]) }
+                else if let Some(seperator) = SEPERATORS.iter().position(|&s| s == input) { Token::Seperator(SEPERATORS[seperator]) }
+                else if let Some(operator) = OPERATORS.iter().position(|&s| s == input) { Token::Operator(OPERATORS[operator]) }
+                else if let Ok(num) =  input.parse::<u32>() { Token::Count(num)}  
+                else if input.chars().all(|c| c.is_alphanumeric()) { Token::Identifier(input.to_string()) }
+                else { return Err(ParseTokenError::InvalidToken(input.to_string())); }
+            )
+        }
+    }
+
+    ///The two possible errors from the tokenizer is an invalid token or some I/O error
+    #[derive(Debug)]
+    pub enum ParseTokenError {
+       InvalidToken(String),
+       ParseIntError(std::num::ParseIntError),
+       IoError(std::io::Error),
+    }
+    impl Error for ParseTokenError {}
+    impl From<std::num::ParseIntError> for ParseTokenError {
+        fn from(err: std::num::ParseIntError) -> ParseTokenError {
+            ParseTokenError::ParseIntError(err)
+        }    
+    }
+    impl From<std::io::Error> for ParseTokenError {
+        fn from(err: io::Error) -> ParseTokenError {
+            ParseTokenError::IoError(err)
+        }    
+    }
+    impl Display for ParseTokenError {
+        fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+            match self {
+                Self::IoError(e) => write!(f, "IO error: {e}"),
+                Self::ParseIntError(e) => write!(f, "Failed to convert to integer: {e}"),
+                Self::InvalidToken(t) => write!(f, "Cannot parse \"{t}\"  into a token"),
+            }
+        }
     }
 }
