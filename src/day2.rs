@@ -50,39 +50,28 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
     
     while let Some(token) = input.pop() { 
         tokens.push(token);
-        match &tokens[..] {
-            [Token::Count(num), Token::Identifier(color)] => {
-                match color.as_str() {
-                    "red" =>  { stack.push(Symbol::Red(*num)) },
-                    "green" =>  { stack.push(Symbol::Green(*num)) },
-                    "blue" =>  { stack.push(Symbol::Blue(*num)) },
-                    _ => {panic!("Loose color matching. {color} is not a valid color!")}
-                };
-                
+        for symbol in match &tokens[..] {
+            [Token::Count(num), Token::Identifier(color)] => match color.as_str() {
+                "red" => vec!(Symbol::Red(*num)),
+                "green" => vec!(Symbol::Green(*num)),
+                "blue" => vec!(Symbol::Blue(*num)),
+                _ => {panic!("Loose color matching. {color} is not a valid color!")}
             },
-            [Token::Seperator(",")] => {
-                //Ignore colon for now
-                tokens.clear();
-            },
-            [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => {
-                stack.push(Symbol::Index(*num));
-                stack.push(Symbol::Match);
-            },
-            [Token::Seperator(";")] | [Token::EndOfInput] => { 
-                stack.push(Symbol::Match);
-                tokens.clear(); 
-            },
-            _ => {continue},
-        }
+            [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => vec!(Symbol::Index(*num), Symbol::Match),
+            [Token::Seperator(";") | Token::EndOfInput] => { tokens.clear(); vec!(Symbol::Match) },
+            [Token::Seperator(",")] => { tokens.clear(); continue; },
+            _ => { continue; },
+        } { 
+            stack.push(symbol); 
 
-        //Clear stack when rule is met
-        tokens.clear();
+            //Clear stack when rule is met
+            tokens.clear();
+        }
     }
 
     let mut curr_match = (0,0,0);
     let mut matches = Vec::<(u32, u32, u32)>::new();
     while let Some(symbol) = stack.pop() {
-        println!("{stack:?}");
         match symbol { 
             Symbol::Index(num) => { *index = num; }, 
             Symbol::Red(num) => { curr_match.0 = num; },
