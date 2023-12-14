@@ -43,10 +43,8 @@ pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>>
 #[derive(Debug)]
 enum Symbol { Index(u32), Red(u32), Green(u32), Blue(u32), Match}
 fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
-    //Evaluate stack
-    let mut stack = Vec::<Symbol>::new();
-
     let mut tokens = Vec::<Token>::new();
+    let mut stack = Vec::<Symbol>::new();
     
     while let Some(token) = input.pop() { 
         tokens.push(token);
@@ -69,6 +67,11 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
         }
     }
 
+    evaluate_stack(stack, index)
+}
+
+fn evaluate_stack(mut stack: Vec<Symbol>, index: &mut u32) -> Vec<(u32, u32, u32)> {
+    //Evaluate stack
     let mut curr_match = (0,0,0);
     let mut matches = Vec::<(u32, u32, u32)>::new();
     while let Some(symbol) = stack.pop() {
