@@ -46,6 +46,7 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
     let mut curr_match = (0,0,0);
 
     let mut tokens = Vec::<Token>::new();
+    
     while let Some(token) = input.pop() { 
         tokens.push(token);
         match &tokens[..] {
@@ -58,11 +59,6 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
                 };
                 
             },
-            [Token::Seperator(";")] => {
-                matches.push(curr_match);
-                curr_match = (0,0,0);
-                tokens.clear();
-            },
             [Token::Seperator(",")] => {
                 //Ignore colon for now
                 tokens.clear();
@@ -70,7 +66,7 @@ fn get_result(mut input: Vec<Token>, index: &mut u32) -> Vec<(u32, u32, u32)> {
             [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => {
                 *index = *num;
             }
-            [Token::EndOfInput] => { 
+            [Token::Seperator(";")] | [Token::EndOfInput] => { 
                 matches.push(curr_match); 
                 curr_match = (0, 0, 0);
                 tokens.clear(); },
