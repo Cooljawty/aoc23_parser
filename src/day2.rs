@@ -1,8 +1,8 @@
-use std::cmp;
+use std::{cmp, mem};
 
 use advent_of_code_2023::tokenizer::{Token, tokenize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 struct Game {
     index: u32,
     matches: Vec<(u32, u32, u32)>,
@@ -11,6 +11,9 @@ impl Game {
     fn new() -> Game { 
         Game{ index: 0, matches: vec!((0,0,0)) } 
     }
+}
+impl Default for Game {
+    fn default() -> Self { Game{ index: 0, matches: vec!((0,0,0)) } }
 }
 
 #[allow(dead_code)]
@@ -46,7 +49,7 @@ fn get_result(input: String) -> Result<Vec<Game>, Box<dyn std::error::Error>> {
     let instructions = parse_tokens(tokens)?;
     //println!("{instructions:?}");
     let result = evaluate_stack(instructions)?;
-    //println!("{result:?}");
+    println!("{result:?}");
 
     Ok(result)
 }
@@ -90,7 +93,7 @@ enum Instruction { Index(u32), Red(u32), Green(u32), Blue(u32), Round, Game}
 fn evaluate_stack(stack: Vec<Instruction>) -> Result<Vec<Game>, Box<dyn std::error::Error>> {
     //println!("{stack:?}");
     //Evaluate stack
-    let mut curr_game = Game::new();
+    let ref mut curr_game = Game::new();
     let results = stack.iter().flat_map(|instruction| match instruction { 
         Instruction::Index(num) => { 
             curr_game.index = *num; 
@@ -113,9 +116,7 @@ fn evaluate_stack(stack: Vec<Instruction>) -> Result<Vec<Game>, Box<dyn std::err
             vec!()
         }
         Instruction::Game => {
-            let result = curr_game.clone();
-            curr_game = Game::new();
-            vec!(result)
+            vec!(mem::take(curr_game))
         }
     }).collect();
 
