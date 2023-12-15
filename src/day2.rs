@@ -16,29 +16,18 @@ impl Game {
 #[allow(dead_code)]
 pub fn get_answer_part_1(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>>{
     let mut sum = 0;
-    'line: for line in input {
-        let mut index: u32 = 0;
-        for result in get_result(line)? {
-            for round in result.matches {
-                match round {
-                (r, g, b) if r > 12 || g > 13 || b > 14 => { 
-                    continue 'line;
-                },
-                _ => {},
-            };
-            index = result.index;
-            }
+    for result in get_result(input.join("\n"))? {
+        if result.matches.iter().all(|round|  round.0 <= 12 && round.1 <= 13 && round.2 <= 14) { 
+            sum += result.index;
         }
-        sum += index;
     }
 
     Ok(sum)
 }
 
 pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>> {
-    let mut sum = 0;
-    for line in input {
-        sum += get_result(line)?.iter()
+    //TODO: give input as full buffer
+    let sum = get_result(input.join("\n"))?.iter()
         .fold(0, |sum, game| {
             let color_count = game.matches.iter()
                 .fold((0,0,0), |color_count, result| {
@@ -49,7 +38,6 @@ pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>>
 
             sum + power
         });
-    }
 
     Ok(sum)
 }
@@ -83,7 +71,8 @@ fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::erro
             },
             [Token::Seperator(",")] => vec!(),
             [Token::Seperator(";")] => vec!(Instruction::Round),
-            [Token::EndOfInput] => vec!(Instruction::Game),
+            //TODO add rule for end of line sepeerator
+            [Token::Seperator("\n") | Token::EndOfInput] => vec!(Instruction::Game),
             _ => return Ok(vec!()),
         };
 

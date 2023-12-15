@@ -18,9 +18,10 @@ pub mod tokenizer {
     }
 
     const KEYWORDS:   &'static [&str] = &["Game"]; 
-    const SEPERATORS: &'static [&str] = &[";", ":", ","]; 
+    const SEPERATORS: &'static [&str] = &[";", ":", ",", "\n"]; 
     const OPERATORS:  &'static [&str] = &["+", "-", "*", "/", "=", "=="]; 
 
+    //TODO: convert newline to seperator
     ///Takes in input buffer and outputs a stream of tokens
     pub fn tokenize(input: impl BufRead) -> Result<Vec<Token>, ParseTokenError> {
         let mut token_stack = Vec::<Token>::new();
@@ -47,6 +48,8 @@ pub mod tokenizer {
             if let Some(token) = curr_token {
                 token_stack.push(token);
             }
+
+            token_stack.push(Token::Seperator("\n"));
         }
 
         token_stack.push(Token::EndOfInput);
