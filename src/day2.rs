@@ -2,16 +2,14 @@ use std::cmp;
 
 use advent_of_code_2023::tokenizer::{Token, tokenize};
 
+#[derive(Clone)]
 struct Game {
     index: u32,
     matches: Vec<(u32, u32, u32)>,
 }
 impl Game {
-    fn new() -> Game { Game{ index: 0, matches: vec!((0,0,0)) } }
-}
-impl Clone for Game {
-    fn clone(&self) -> Self {
-        Game{ index: self.index, matches: self.matches.clone() }
+    fn new() -> Game { 
+        Game{ index: 0, matches: vec!((0,0,0)) } 
     }
 }
 
