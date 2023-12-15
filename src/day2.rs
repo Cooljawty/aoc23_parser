@@ -2,7 +2,7 @@ use std::cmp;
 
 use advent_of_code_2023::tokenizer::{Token, tokenize};
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 struct Game {
     index: u32,
     matches: Vec<(u32, u32, u32)>,
@@ -38,25 +38,30 @@ pub fn get_answer_part_1(input: Vec<String>) -> Result<u32, Box<dyn std::error::
 pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>> {
     let mut sum = 0;
     for line in input {
-        let mut color_count = (0,0,0);
-        for result in &get_result(line)?.first().unwrap().matches {
-            color_count = (
-                cmp::max(result.0, color_count.0), 
-                cmp::max(result.1, color_count.1), 
-                cmp::max(result.2, color_count.2)
-            );
-        }
-        let power = color_count.0 * color_count.1 * color_count.2; 
-        sum += power;
+        sum += get_result(line)?.iter()
+        .fold(0, |sum, game| {
+            let color_count = game.matches.iter()
+                .fold((0,0,0), |color_count, result| {
+                    (cmp::max(result.0, color_count.0), cmp::max(result.1, color_count.1), cmp::max(result.2, color_count.2))
+                });
+            let power = color_count.0 * color_count.1 * color_count.2; 
+            println!("{color_count:?} = {power}");
+
+            sum + power
+        });
     }
 
     Ok(sum)
 }
 
 fn get_result(input: String) -> Result<Vec<Game>, Box<dyn std::error::Error>> {
+    //println!("{input:?}");
     let tokens = tokenize(input.as_bytes())?;
+    //println!("{tokens:#?}");
     let instructions = parse_tokens(tokens)?;
+    //println!("{instructions:?}");
     let result = evaluate_stack(instructions)?;
+    //println!("{result:?}");
 
     Ok(result)
 }
@@ -71,15 +76,15 @@ fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::erro
             [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => vec!(Instruction::Index(*num)),
             [Token::Count(num), Token::Identifier(color)] => match color.as_str() 
             {
-                "red" => vec!(Instruction::Red(*num)),
+                "red"   => vec!(Instruction::Red(*num)),
                 "green" => vec!(Instruction::Green(*num)),
-                "blue" => vec!(Instruction::Blue(*num)),
-                _ => { return Err(ParseTokenError::InvalidToken(color.to_string())) }
+                "blue"  => vec!(Instruction::Blue(*num)),
+                _ => return Err(ParseTokenError::InvalidToken(color.to_string())),
             },
             [Token::Seperator(",")] => vec!(),
             [Token::Seperator(";")] => vec!(Instruction::Round),
             [Token::EndOfInput] => vec!(Instruction::Game),
-            _ => { return Ok(vec!()) },
+            _ => return Ok(vec!()),
         };
 
         tokens.clear(); 
