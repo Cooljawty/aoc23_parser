@@ -16,9 +16,9 @@ impl Game {
 #[allow(dead_code)]
 pub fn get_answer_part_1(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>>{
     let mut sum = 0;
-    for result in get_result(input.join("\n"))? {
-        if result.matches.iter().all(|round|  round.0 <= 12 && round.1 <= 13 && round.2 <= 14) { 
-            sum += result.index;
+    for Game{ index, matches } in get_result(input.join("\n"))? {
+        if matches.iter().all(|&(reds, greens, blues)|  reds <= 12 && greens <= 13 && blues <= 14) { 
+            sum += index;
         }
     }
 
@@ -28,15 +28,12 @@ pub fn get_answer_part_1(input: Vec<String>) -> Result<u32, Box<dyn std::error::
 pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>> {
     //TODO: give input as full buffer
     let sum = get_result(input.join("\n"))?.iter()
-        .fold(0, |sum, game| {
-            let color_count = game.matches.iter()
-                .fold((0,0,0), |color_count, result| {
-                    (cmp::max(result.0, color_count.0), cmp::max(result.1, color_count.1), cmp::max(result.2, color_count.2))
+        .fold(0, |sum, Game{ matches, .. }| {
+            let (reds, greens, blues) = matches.iter()
+                .fold((0,0,0), |(min_reds, min_greens, min_blues), &(reds, greens, blues)| {
+                    (cmp::max(min_reds, reds), cmp::max(min_greens, greens), cmp::max(min_blues, blues))
                 });
-            let power = color_count.0 * color_count.1 * color_count.2; 
-            println!("{color_count:?} = {power}");
-
-            sum + power
+            sum + reds * greens * blues
         });
 
     Ok(sum)
