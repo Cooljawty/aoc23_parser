@@ -21,7 +21,6 @@ pub mod tokenizer {
     const SEPERATORS: &'static [&str] = &[";", ":", ",", "\n"]; 
     const OPERATORS:  &'static [&str] = &["+", "-", "*", "/", "=", "=="]; 
 
-    //TODO: convert newline to seperator
     ///Takes in input buffer and outputs a stream of tokens
     pub fn tokenize(input: impl BufRead) -> Result<Vec<Token>, ParseTokenError> {
         let mut token_stack = Vec::<Token>::new();

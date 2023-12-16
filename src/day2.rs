@@ -28,9 +28,9 @@ pub fn get_answer_part_1(input: Vec<String>) -> Result<u32, Box<dyn std::error::
     Ok(sum)
 }
 
-pub fn get_answer(input: Vec<String>) -> Result<u32, Box<dyn std::error::Error>> {
+pub fn get_answer(input: String) -> Result<u32, Box<dyn std::error::Error>> {
     //TODO: give input as full buffer
-    let sum = get_result(input.join("\n"))?.iter()
+    let sum = get_result(input)?.iter()
         .fold(0, |sum, Game{ matches, .. }| {
             let (reds, greens, blues) = matches.iter()
                 .fold((0,0,0), |(min_reds, min_greens, min_blues), &(reds, greens, blues)| {
@@ -71,7 +71,6 @@ fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::erro
             },
             [Token::Seperator(",")] => vec!(),
             [Token::Seperator(";")] => vec!(Instruction::Round),
-            //TODO add rule for end of line sepeerator
             [Token::Seperator("\n") | Token::EndOfInput] => vec!(Instruction::Game),
             _ => return Ok(vec!()),
         };
@@ -151,7 +150,7 @@ mod tests {
             "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green",
         );
 
-        let result = get_answer(test_input.iter().map(|s| s.to_string()).collect())?;
+        let result = get_answer(test_input.join("\n"))?;
         assert_eq!(result, 2286, "Expected {:?}, got {:?}", 2286, result); 
         Ok(())
     }

@@ -14,7 +14,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     //Solve Day 1 part 2
     match puzzle_input.next() {
-        Some(src) => { println!("Day 1: {}", day1::get_answer(src)) },
+        Some(src) => { println!("Day 1: {}", day1::get_answer(src.split('\n').map(|s| s.to_string()).collect::<Vec<_>>())) },
         None => { return Err("Could not get Day 1 input".into()) },
     }
 
@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn get_input(src: &str, auth: &str) -> Result<Vec<String>, Box<dyn std::error::Error>>{
+fn get_input(src: &str, auth: &str) -> Result<String, Box<dyn std::error::Error>>{
     let res = reqwest::blocking::Client::new().get(src)
         .header(USER_AGENT, "")
         .header(COOKIE, format!("session={}", auth))
@@ -36,16 +36,7 @@ fn get_input(src: &str, auth: &str) -> Result<Vec<String>, Box<dyn std::error::E
 
     let res_body= res.text()?;
 
-    let res_body = res_body.split('\n').collect::<Vec<_>>();
-
-    let mut input = Vec::<String>::new();
-    for value in res_body {
-        if !value.is_empty() {
-            input.push(value.to_string());
-        }
-    }
-
-    Ok(input)
+    Ok(res_body.to_string())
 
 }
 
