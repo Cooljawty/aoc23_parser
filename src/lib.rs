@@ -7,7 +7,7 @@ pub mod tokenizer {
         str::FromStr,
     };
 
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     pub enum Token {
         Keyword(&'static str),
         Seperator(&'static str),
@@ -101,3 +101,39 @@ pub mod tokenizer {
     }
 }
 
+///Contains a struct for a stream of tokens and a method to parse and convert to a series of
+///instructions.
+pub mod parser {
+
+    use crate::tokenizer::*;
+
+    #[derive(Debug, Clone)]
+    pub enum Instruction { Index(u32), Red(u32), Green(u32), Blue(u32), Round, Game}
+
+    pub struct TokenStream {
+        stream: Vec<Token>,
+    }
+    impl TokenStream {
+        pub fn new(tokens: Vec<Token>) -> TokenStream { TokenStream { stream: tokens.into() } }
+
+        ///Takes in a closure defining parsing rules and returns a set of instructions. Fails if the
+        ///rule set returns an error.
+        pub fn parse<F>(self, mut rule_set: F) -> Result<Vec<Instruction>, Box<dyn std::error::Error>>
+        where 
+            F: FnMut(&mut Vec<Token>) -> Result<Option<Vec<Instruction>>, ParseTokenError>  
+        {
+            let mut result = Vec::<Vec<Instruction>>::new();
+            let mut buffer = Vec::<Token>::new();
+            for token in self.stream {
+                buffer.push(token.clone());
+                if let Some(instructions) = rule_set(&mut buffer)? {
+                    result.push(instructions);
+                    buffer.clear();
+                }
+            }
+            let result = result.into_iter().flatten().collect();
+
+            Ok(result)
+        }
+    }
+}

@@ -1,6 +1,9 @@
 use std::{cmp, mem};
 
-use advent_of_code_2023::tokenizer::{Token, tokenize, ParseTokenError};
+use advent_of_code_2023::{
+    tokenizer::{Token, tokenize, ParseTokenError},
+    parser::{Instruction, TokenStream},
+};
 
 #[derive(Debug)]
 struct Game {
@@ -53,28 +56,6 @@ fn get_result(input: String) -> Result<Vec<Game>, Box<dyn std::error::Error>> {
     Ok(result)
 }
 
-struct TokenStream {
-    stream: Vec<Token>,
-}
-impl TokenStream {
-    fn new(tokens: Vec<Token>) -> TokenStream { TokenStream { stream: tokens.into() } }
-
-    fn parse<F>(self, mut f: F) -> Result<Vec<Instruction>, Box<dyn std::error::Error>>
-    where 
-        F: FnMut(&mut Vec<Token>) -> Result<Option<Vec<Instruction>>, ParseTokenError>  
-    {
-        let mut result = Vec::<Vec<Instruction>>::new();
-        let mut buffer = Vec::<Token>::new();
-        for token in self.stream {
-            buffer.push(token.clone());
-            if let Some(instructions) = f(&mut buffer)? {
-                result.push(instructions);
-                buffer.clear();
-            }
-        }
-        Ok(result.into_iter().flatten().collect())
-    }
-}
 fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::error::Error>> {
     let stream = TokenStream::new(input);
     
@@ -95,9 +76,6 @@ fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::erro
         })
     })
 }
-
-#[derive(Debug, Clone)]
-enum Instruction { Index(u32), Red(u32), Green(u32), Blue(u32), Round, Game}
 fn evaluate_stack(stack: Vec<Instruction>) -> Result<Vec<Game>, Box<dyn std::error::Error>> {
     //println!("{stack:?}");
     //Evaluate stack
