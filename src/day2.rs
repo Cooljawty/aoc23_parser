@@ -61,13 +61,19 @@ impl TokenStream {
 
     fn parse<F>(self, mut f: F) -> Result<Vec<Instruction>, Box<dyn std::error::Error>>
     where 
-        F: FnMut(&mut Vec<Token>) -> Result<Vec<Instruction>, advent_of_code_2023::tokenizer::ParseTokenError>  
+        F: FnMut(&mut Vec<Token>) -> Result<Option<Vec<Instruction>>, advent_of_code_2023::tokenizer::ParseTokenError>  
     {
         let mut result = Vec::<Instruction>::new();
         let mut buffer = Vec::<Token>::new();
         for token in self.stream {
             buffer.push(token.clone());
-            f(&mut buffer)?.iter().for_each(|i| result.push(i.clone()));
+            match f(&mut buffer)? {
+                Some(instructions) => {
+                    instructions.iter().for_each(|i| result.push(i.clone()));
+                    buffer.clear();
+                },
+                None => {},
+            };
         }
         Ok(result)
     }
@@ -90,12 +96,10 @@ fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::erro
             [Token::Seperator(",")] => vec!(),
             [Token::Seperator(";")] => vec!(Instruction::Round),
             [Token::Seperator("\n") | Token::EndOfInput] => vec!(Instruction::Game),
-            _ => return Ok(vec!()),
+            _ => return Ok(None),
         };
 
-        buffer.clear(); 
-
-        Ok(instructions)
+        Ok(Some(instructions))
     })
 }
 
