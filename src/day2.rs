@@ -63,26 +63,23 @@ impl TokenStream {
     where 
         F: FnMut(&mut Vec<Token>) -> Result<Option<Vec<Instruction>>, ParseTokenError>  
     {
-        let mut result = Vec::<Instruction>::new();
+        let mut result = Vec::<Vec<Instruction>>::new();
         let mut buffer = Vec::<Token>::new();
         for token in self.stream {
             buffer.push(token.clone());
-            match f(&mut buffer)? {
-                Some(instructions) => {
-                    instructions.iter().for_each(|i| result.push(i.clone()));
-                    buffer.clear();
-                },
-                None => {},
-            };
+            if let Some(instructions) = f(&mut buffer)? {
+                result.push(instructions);
+                buffer.clear();
+            }
         }
-        Ok(result)
+        Ok(result.into_iter().flatten().collect())
     }
 }
 fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::error::Error>> {
     let stream = TokenStream::new(input);
     
-    stream.parse(|buffer| { 
-        Ok( match &buffer[..] {
+    stream.parse(|pattern| { 
+        Ok( match &pattern[..] {
             [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => Some(vec!(Instruction::Index(*num))),
             [Token::Count(num), Token::Identifier(color)] => match color.as_str() 
             {
