@@ -29,7 +29,6 @@ pub fn get_answer_part_1(input: Vec<String>) -> Result<u32, Box<dyn std::error::
 }
 
 pub fn get_answer(input: String) -> Result<u32, Box<dyn std::error::Error>> {
-    //TODO: give input as full buffer
     let sum = get_result(input)?.iter()
         .fold(0, |sum, Game{ matches, .. }| {
             let (reds, greens, blues) = matches.iter()
@@ -54,11 +53,30 @@ fn get_result(input: String) -> Result<Vec<Game>, Box<dyn std::error::Error>> {
     Ok(result)
 }
 
+struct TokenStream {
+    stream: Vec<Token>,
+}
+impl TokenStream {
+    fn new(tokens: Vec<Token>) -> TokenStream { TokenStream { stream: tokens.into() } }
+
+    fn parse<F>(self, mut f: F) -> Result<Vec<Instruction>, Box<dyn std::error::Error>>
+    where 
+        F: FnMut(Token) -> Result<Vec<Instruction>, advent_of_code_2023::tokenizer::ParseTokenError>  
+    {
+        let mut result = Vec::<Instruction>::new();
+        for token in self.stream {
+            f(token)?.iter().for_each(|i| result.push(i.clone()));
+        }
+        Ok(result)
+    }
+}
 fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::error::Error>> {
     use advent_of_code_2023::tokenizer::ParseTokenError;
 
-    let mut tokens = Vec::<&Token>::new();
-    let instructions = input.iter().map(|token| { 
+    let mut tokens = Vec::<Token>::new();
+    let stream = TokenStream::new(input);
+    
+    stream.parse(|token| { 
         tokens.push(token);
         let instructions = match &tokens[..] {
             [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => vec!(Instruction::Index(*num)),
@@ -79,15 +97,9 @@ fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::erro
 
         Ok(instructions)
     })
-    .collect::<Result<Vec<_>, _>>()?
-    .into_iter()
-    .flatten()
-    .collect();
-
-    Ok(instructions)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Instruction { Index(u32), Red(u32), Green(u32), Blue(u32), Round, Game}
 fn evaluate_stack(stack: Vec<Instruction>) -> Result<Vec<Game>, Box<dyn std::error::Error>> {
     //println!("{stack:?}");
