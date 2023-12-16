@@ -1,6 +1,6 @@
 use std::{cmp, mem};
 
-use advent_of_code_2023::tokenizer::{Token, tokenize};
+use advent_of_code_2023::tokenizer::{Token, tokenize, ParseTokenError};
 
 #[derive(Debug)]
 struct Game {
@@ -61,7 +61,7 @@ impl TokenStream {
 
     fn parse<F>(self, mut f: F) -> Result<Vec<Instruction>, Box<dyn std::error::Error>>
     where 
-        F: FnMut(&mut Vec<Token>) -> Result<Option<Vec<Instruction>>, advent_of_code_2023::tokenizer::ParseTokenError>  
+        F: FnMut(&mut Vec<Token>) -> Result<Option<Vec<Instruction>>, ParseTokenError>  
     {
         let mut result = Vec::<Instruction>::new();
         let mut buffer = Vec::<Token>::new();
@@ -79,27 +79,23 @@ impl TokenStream {
     }
 }
 fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::error::Error>> {
-    use advent_of_code_2023::tokenizer::ParseTokenError;
-
     let stream = TokenStream::new(input);
     
     stream.parse(|buffer| { 
-        let instructions = match &buffer[..] {
-            [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => vec!(Instruction::Index(*num)),
+        Ok( match &buffer[..] {
+            [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => Some(vec!(Instruction::Index(*num))),
             [Token::Count(num), Token::Identifier(color)] => match color.as_str() 
             {
-                "red"   => vec!(Instruction::Red(*num)),
-                "green" => vec!(Instruction::Green(*num)),
-                "blue"  => vec!(Instruction::Blue(*num)),
+                "red"   => Some(vec!(Instruction::Red(*num))),
+                "green" => Some(vec!(Instruction::Green(*num))),
+                "blue"  => Some(vec!(Instruction::Blue(*num))),
                 _ => return Err(ParseTokenError::InvalidToken(color.to_string())),
             },
-            [Token::Seperator(",")] => vec!(),
-            [Token::Seperator(";")] => vec!(Instruction::Round),
-            [Token::Seperator("\n") | Token::EndOfInput] => vec!(Instruction::Game),
-            _ => return Ok(None),
-        };
-
-        Ok(Some(instructions))
+            [Token::Seperator(",")] => Some(vec!()),
+            [Token::Seperator(";")] => Some(vec!(Instruction::Round)),
+            [Token::Seperator("\n") | Token::EndOfInput] => Some(vec!(Instruction::Game)),
+            _ => None,
+        })
     })
 }
 
