@@ -1,8 +1,7 @@
 use std::{cmp, mem};
 
 use advent_of_code_2023::{
-    tokenizer::{Token, tokenize, ParseTokenError},
-    parser::{TokenStream},
+    tokenizer::{TokenStream, Token, tokenize, ParseTokenError},
 };
 
 #[derive(Debug)]
@@ -58,7 +57,6 @@ fn get_result(input: String) -> Result<Vec<Game>, Box<dyn std::error::Error>> {
 
 #[derive(Debug, Clone)]
 pub enum Instruction { Index(u32), Red(u32), Green(u32), Blue(u32), Round, Game}
-
 fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::error::Error>> {
     let stream = TokenStream::new(input);
     

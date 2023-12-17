@@ -99,20 +99,32 @@ pub mod tokenizer {
             }
         }
     }
-}
-
-///Contains a struct for a stream of tokens and a method to parse and convert to a series of
-///instructions.
-pub mod parser {
-
-    use crate::tokenizer::*;
 
     pub struct TokenStream {
         stream: Vec<Token>,
     }
     impl TokenStream {
         pub fn new(tokens: Vec<Token>) -> TokenStream { TokenStream { stream: tokens.into() } }
+    }
+    impl Iterator for TokenStream {
+        type Item = Token;
 
+        fn next(&mut self) -> Option<Self::Item> {
+            if !self.stream.is_empty() {
+                Some(self.stream.remove(0))
+            } else {
+                None
+            }
+        }
+    }
+}
+
+///Contains a struct for a stream of tokens and a method to parse and convert to a series of
+///instructions.
+pub mod parser {
+    pub use crate::tokenizer::*;
+
+    impl TokenStream {
         ///Takes in a closure defining parsing rules and returns a set of instructions. Fails if the
         ///rule set returns an error.
         pub fn parse<F, I>(self, mut rule_set: F) -> Result<Vec<I>, Box<dyn std::error::Error>>
@@ -121,7 +133,7 @@ pub mod parser {
         {
             let mut result = Vec::<Vec<I>>::new();
             let mut buffer = Vec::<Token>::new();
-            for token in self.stream {
+            for token in self {
                 buffer.push(token.clone());
                 if let Some(instructions) = rule_set(&mut buffer)? {
                     result.push(instructions);
