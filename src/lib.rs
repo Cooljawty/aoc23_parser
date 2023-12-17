@@ -68,8 +68,7 @@ pub mod tokenizer {
 
     #[derive(Default)]
     pub struct TokenStream {
-        //TODO remove public scope
-        pub stream: Vec<Token>,
+        stream: Vec<Token>,
     }
     impl TokenStream {
         pub fn new(tokens: Vec<Token>) -> TokenStream { TokenStream { stream: tokens.into() } }

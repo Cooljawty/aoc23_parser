@@ -47,7 +47,7 @@ fn get_result(input: String) -> Result<Vec<Game>, Box<dyn std::error::Error>> {
     //println!("{input:?}");
     let tokens = TokenStream::tokenize(input.as_bytes())?;
     //println!("{tokens:#?}");
-    let instructions = parse_tokens(tokens.stream)?;
+    let instructions = parse_tokens(tokens)?;
     //println!("{instructions:?}");
     let result = evaluate_stack(instructions)?;
     println!("{result:?}");
@@ -57,9 +57,7 @@ fn get_result(input: String) -> Result<Vec<Game>, Box<dyn std::error::Error>> {
 
 #[derive(Debug, Clone)]
 pub enum Instruction { Index(u32), Red(u32), Green(u32), Blue(u32), Round, Game}
-fn parse_tokens(input: Vec<Token>) -> Result<Vec<Instruction>, Box<dyn std::error::Error>> {
-    let stream = TokenStream::new(input);
-    
+fn parse_tokens(stream: TokenStream) -> Result<Vec<Instruction>, Box<dyn std::error::Error>> {
     stream.parse(|pattern| { 
         Ok( match &pattern[..] {
             [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => Some(vec!(Instruction::Index(*num))),
