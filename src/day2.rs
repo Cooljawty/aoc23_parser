@@ -44,35 +44,29 @@ pub fn get_answer(input: String) -> Result<u32, Box<dyn std::error::Error>> {
 }
 
 fn get_result(input: String) -> Result<Vec<Game>, Box<dyn std::error::Error>> {
-    //println!("{input:?}");
     let tokens = TokenStream::tokenize(input.as_bytes())?;
-    //println!("{tokens:#?}");
-    let instructions = parse_tokens(tokens)?;
-    //println!("{instructions:?}");
+    let instructions = tokens.parse(parse_tokens)?;
     let result = evaluate_stack(instructions)?;
-    println!("{result:?}");
 
     Ok(result)
 }
 
 #[derive(Debug, Clone)]
 pub enum Instruction { Index(u32), Red(u32), Green(u32), Blue(u32), Round, Game}
-fn parse_tokens(stream: TokenStream) -> Result<Vec<Instruction>, Box<dyn std::error::Error>> {
-    stream.parse(|pattern| { 
-        Ok( match &pattern[..] {
-            [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => Some(vec!(Instruction::Index(*num))),
-            [Token::Count(num), Token::Identifier(color)] => match color.as_str() 
-            {
-                "red"   => Some(vec!(Instruction::Red(*num))),
-                "green" => Some(vec!(Instruction::Green(*num))),
-                "blue"  => Some(vec!(Instruction::Blue(*num))),
-                _ => return Err(ParseTokenError::InvalidToken(color.to_string())),
-            },
-            [Token::Seperator(",")] => Some(vec!()),
-            [Token::Seperator(";")] => Some(vec!(Instruction::Round)),
-            [Token::Seperator("\n") | Token::EndOfInput] => Some(vec!(Instruction::Game)),
-            _ => None,
-        })
+fn parse_tokens(pattern: &mut Vec<Token>) -> Result<Option<Vec<Instruction>>, ParseTokenError> { 
+    Ok( match &pattern[..] {
+        [Token::Keyword("Game") , Token::Count(num), Token::Seperator(":")] => Some(vec!(Instruction::Index(*num))),
+        [Token::Count(num), Token::Identifier(color)] => match color.as_str() 
+        {
+            "red"   => Some(vec!(Instruction::Red(*num))),
+            "green" => Some(vec!(Instruction::Green(*num))),
+            "blue"  => Some(vec!(Instruction::Blue(*num))),
+            _ => return Err(ParseTokenError::InvalidToken(color.to_string())),
+        },
+        [Token::Seperator(",")] => Some(vec!()),
+        [Token::Seperator(";")] => Some(vec!(Instruction::Round)),
+        [Token::Seperator("\n") | Token::EndOfInput] => Some(vec!(Instruction::Game)),
+        _ => None,
     })
 }
 fn evaluate_stack(stack: Vec<Instruction>) -> Result<Vec<Game>, Box<dyn std::error::Error>> {
