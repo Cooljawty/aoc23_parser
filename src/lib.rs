@@ -21,40 +21,6 @@ pub mod tokenizer {
     const SEPERATORS: &'static [&str] = &[";", ":", ",", "\n"]; 
     const OPERATORS:  &'static [&str] = &["+", "-", "*", "/", "=", "=="]; 
 
-    ///Takes in input buffer and outputs a stream of tokens
-    pub fn tokenize(input: impl BufRead) -> Result<Vec<Token>, ParseTokenError> {
-        let mut token_stack = Vec::<Token>::new();
-
-        for line in input.lines() {
-            let mut input = line?;
-
-            let mut curr_token = None;
-            let mut marker = 0usize;
-            while let Some(input_view) = input.get(0..marker) {
-                if let Some(matching_token) = input_view.trim().parse::<Token>().ok() {
-                    curr_token = Some(matching_token);
-                    marker += 1;
-                } else if let Some(token) = curr_token {
-                    token_stack.push(token);
-                    input.replace_range(0..marker-1, "");
-
-                    marker = 0usize;
-                    curr_token = None;
-                } else { 
-                    marker += 1; 
-                }
-            }
-            if let Some(token) = curr_token {
-                token_stack.push(token);
-            }
-
-            token_stack.push(Token::Seperator("\n"));
-        }
-
-        token_stack.push(Token::EndOfInput);
-        Ok(token_stack)
-    }
-
     ///Strictly parses string to single token.
     ///Assumes that tokens are mutualy exlusive
     impl FromStr for Token {
@@ -100,11 +66,48 @@ pub mod tokenizer {
         }
     }
 
+    #[derive(Default)]
     pub struct TokenStream {
-        stream: Vec<Token>,
+        //TODO remove public scope
+        pub stream: Vec<Token>,
     }
     impl TokenStream {
         pub fn new(tokens: Vec<Token>) -> TokenStream { TokenStream { stream: tokens.into() } }
+
+        ///Takes in input buffer and outputs a stream of tokens
+        pub fn tokenize(input: impl BufRead) -> Result<TokenStream, ParseTokenError> {
+            let mut token_stack = TokenStream::default();
+
+            for line in input.lines() {
+                let mut input = line?;
+
+                let mut curr_token = None;
+                let mut marker = 0usize;
+                while let Some(input_view) = input.get(0..marker) {
+                    if let Some(matching_token) = input_view.trim().parse::<Token>().ok() {
+                        curr_token = Some(matching_token);
+                        marker += 1;
+                    } else if let Some(token) = curr_token {
+                        token_stack.stream.push(token);
+                        input.replace_range(0..marker-1, "");
+
+                        marker = 0usize;
+                        curr_token = None;
+                    } else { 
+                        marker += 1; 
+                    }
+                }
+                if let Some(token) = curr_token {
+                    token_stack.stream.push(token);
+                }
+
+                token_stack.stream.push(Token::Seperator("\n"));
+            }
+
+            token_stack.stream.push(Token::EndOfInput);
+            Ok(token_stack)
+        }
+
     }
     impl Iterator for TokenStream {
         type Item = Token;

@@ -1,7 +1,7 @@
 use std::{cmp, mem};
 
 use advent_of_code_2023::{
-    tokenizer::{TokenStream, Token, tokenize, ParseTokenError},
+    tokenizer::{TokenStream, Token, ParseTokenError},
 };
 
 #[derive(Debug)]
@@ -45,9 +45,9 @@ pub fn get_answer(input: String) -> Result<u32, Box<dyn std::error::Error>> {
 
 fn get_result(input: String) -> Result<Vec<Game>, Box<dyn std::error::Error>> {
     //println!("{input:?}");
-    let tokens = tokenize(input.as_bytes())?;
+    let tokens = TokenStream::tokenize(input.as_bytes())?;
     //println!("{tokens:#?}");
-    let instructions = parse_tokens(tokens)?;
+    let instructions = parse_tokens(tokens.stream)?;
     //println!("{instructions:?}");
     let result = evaluate_stack(instructions)?;
     println!("{result:?}");
