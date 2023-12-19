@@ -3,7 +3,7 @@ name = "aoc23_parser"
 description = "A basic LL(1) parser used for the 2023 Advent of Code"
 repository = "https://github.com/Cooljawty/aoc23_parser"
 license = "GPL-2.0-or-later"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["cooljawty"]
 
