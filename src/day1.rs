@@ -13,7 +13,7 @@ fn parse_input(value: &String) -> u32 {
 
     if digits.len() == 1 { digits.push(digits[0]) };
 
-    digits.remove(digits.len()-1) + digits.remove(0) * 10
+    digits.last().unwrap_or(&0) + digits.first().unwrap_or(&0) * 10
 }
 
 //Parses line returning first digit and the remaining line
