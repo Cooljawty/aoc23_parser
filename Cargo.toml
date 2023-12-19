@@ -1,12 +1,11 @@
 [package]
-name = "advent_of_code_2023"
+name = "aoc23_parser"
+description = "A basic LL(1) parser used for the 2023 Advent of Code"
+license = "GPL-2.0-or-later"
 version = "0.1.0"
 edition = "2021"
-authors = ["cooljacwty"]
-publish = false
-
-[features]
-try_trait_v2 = []
+authors = ["cooljawty"]
 
 [dependencies]
+#Just used for getting input data
 reqwest = { version = "0.11.22", features = ["blocking"] }

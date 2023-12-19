@@ -66,6 +66,7 @@ pub mod tokenizer {
         }
     }
 
+    ///A TokenStream is a string of tokens with methods to fill, iterate and parse the tokens.
     #[derive(Default)]
     pub struct TokenStream {
         stream: Vec<Token>,

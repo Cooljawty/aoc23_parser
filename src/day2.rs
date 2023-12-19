@@ -1,6 +1,6 @@
 use std::{cmp, mem};
 
-use advent_of_code_2023::{
+use aoc23_parser::{
     tokenizer::{TokenStream, Token, ParseTokenError},
 };
 
